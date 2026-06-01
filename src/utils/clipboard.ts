@@ -87,11 +87,31 @@ function pasteObjects(originals: CanvasObject[]): void {
   store.setSelectedIds(newIds);
 }
 
+/**
+ * Read a File as a base64 data URL.
+ *
+ * We deliberately avoid URL.createObjectURL() here because blob: URLs are
+ * session-local — they only exist in the browser tab that created them and
+ * cannot be accessed by any other user or device.  A data URL embeds the
+ * entire image as a base64 string so it round-trips through NeonDB and
+ * renders correctly for every viewer, including shared / view-only links.
+ */
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror   = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export async function createImageObjectFromFile(
   file: File,
   position: { x: number; y: number },
 ): Promise<void> {
-  const blobUrl = URL.createObjectURL(file);
+  // Convert to a portable data URL so the image survives across devices,
+  // shared links, and page refreshes (blob: URLs are ephemeral + local-only).
+  const dataUrl = await fileToDataUrl(file);
 
   return new Promise((resolve) => {
     const img = new Image();
@@ -114,7 +134,7 @@ export async function createImageObjectFromFile(
         layerId: 'default', parentId: null,
         zIndex: maxZ + 1,
         createdAt: now, updatedAt: now,
-        src: blobUrl,
+        src: dataUrl,               // ← portable data URL, not a blob: URL
         originalWidth: img.naturalWidth,
         originalHeight: img.naturalHeight,
         cropX: 0, cropY: 0,
@@ -127,6 +147,6 @@ export async function createImageObjectFromFile(
       resolve();
     };
     img.onerror = () => resolve();
-    img.src = blobUrl;
+    img.src = dataUrl;
   });
 }
