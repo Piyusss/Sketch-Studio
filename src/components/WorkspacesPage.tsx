@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { UserMenu } from './UserMenu';
 import { useWorkspaceStore } from '../store/workspaceStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 function CreateWorkspaceModal({ onClose, onCreate }: { onClose: () => void; onCreate: (name: string) => void }) {
   const [name, setName] = useState('');
+  const mob = useIsMobile();
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -24,7 +26,7 @@ function CreateWorkspaceModal({ onClose, onCreate }: { onClose: () => void; onCr
         onClick={(e) => e.stopPropagation()}
         style={{
           background: '#fff', borderRadius: 16, padding: '28px 32px',
-          width: 360, boxShadow: '0 24px 48px rgba(0,0,0,0.16)',
+          width: mob ? 'calc(100vw - 32px)' : 360, maxWidth: 360, boxShadow: '0 24px 48px rgba(0,0,0,0.16)',
         }}
       >
         <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#0F172A' }}>
@@ -77,6 +79,7 @@ interface WorkspacesPageProps {
 }
 
 export function WorkspacesPage({ onOpen, onHome }: WorkspacesPageProps) {
+  const mobile = useIsMobile();
   const { user } = useAuthStore();
   const { workspaces, createWorkspace, deleteWorkspace, renameWorkspace } = useWorkspaceStore();
   const [showCreate, setShowCreate] = useState(false);
@@ -111,7 +114,7 @@ export function WorkspacesPage({ onOpen, onHome }: WorkspacesPageProps) {
       <div style={{
         height: 56, background: '#fff', borderBottom: '1px solid #EEF2FF',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px',
+        padding: mobile ? '0 16px' : '0 32px',
       }}>
         <div
           style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: onHome ? 'pointer' : 'default' }}
@@ -132,7 +135,7 @@ export function WorkspacesPage({ onOpen, onHome }: WorkspacesPageProps) {
         <UserMenu />
       </div>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 32px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: mobile ? '24px 16px' : '48px 32px' }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -183,7 +186,7 @@ export function WorkspacesPage({ onOpen, onHome }: WorkspacesPageProps) {
             </button>
           </motion.div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: mobile ? 10 : 16 }}>
             {sorted.map((ws, i) => (
               <motion.div
                 key={ws.id}

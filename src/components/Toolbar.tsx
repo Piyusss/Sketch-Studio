@@ -316,7 +316,12 @@ export function Toolbar() {
   }
 
   return (
-    <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
+    <div style={{
+      position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
+      zIndex: 100,
+      // On narrow screens, constrain width and allow horizontal scroll
+      maxWidth: 'calc(100vw - 24px)',
+    }}>
     {/* Hidden file input for image insertion */}
     <input
       ref={fileInputRef}
@@ -329,7 +334,7 @@ export function Toolbar() {
       {activeTool === 'pen'   && <PenPanel   key="pen-panel"   />}
       {activeTool === 'laser' && <LaserPanel key="laser-panel" />}
     </AnimatePresence>
-    <div style={{
+    <div className="toolbar-scroll" style={{
       display: 'flex', alignItems: 'center', gap: 2,
       background: '#ffffff', border: '1px solid #E4E4E7',
       borderRadius: 10, padding: '4px 6px',

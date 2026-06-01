@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { UserMenu } from './UserMenu';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -632,39 +633,40 @@ interface FeatureSectionProps {
 }
 
 function FeatureSection({ label, title, description, visual, reverse = false }: FeatureSectionProps) {
+  const mob = useIsMobile();
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 80,
-      flexDirection: reverse ? 'row-reverse' : 'row',
+      display: 'flex', alignItems: mob ? 'stretch' : 'center',
+      gap: mob ? 24 : 80,
+      flexDirection: mob ? 'column' : (reverse ? 'row-reverse' : 'row'),
     }}>
       <motion.div
         variants={stagger} initial="hidden" whileInView="show"
-        viewport={{ once: true, margin: '-60px' }}
+        viewport={{ once: true, margin: '-40px' }}
         style={{ flex: 1, minWidth: 0 }}
       >
         <motion.div variants={fadeUp}>
           <span style={{
             display: 'inline-block', fontSize: 11, fontWeight: 600,
             letterSpacing: '0.09em', textTransform: 'uppercase',
-            color: '#A1A1AA', marginBottom: 16,
+            color: '#A1A1AA', marginBottom: mob ? 10 : 16,
           }}>{label}</span>
         </motion.div>
         <motion.h2 variants={fadeUp} style={{
-          fontSize: 36, fontWeight: 800, lineHeight: 1.14,
-          letterSpacing: '-0.03em', color: '#09090B', margin: '0 0 18px',
+          fontSize: mob ? 24 : 36, fontWeight: 800, lineHeight: 1.14,
+          letterSpacing: '-0.02em', color: '#09090B', margin: `0 0 ${mob ? '12px' : '18px'}`,
         }}>{title}</motion.h2>
         <motion.p variants={fadeUp} style={{
-          fontSize: 16, lineHeight: 1.72, color: '#71717A',
-          margin: 0, maxWidth: 420,
+          fontSize: mob ? 14 : 16, lineHeight: 1.65, color: '#71717A', margin: 0,
         }}>{description}</motion.p>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 28, scale: 0.97 }}
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-        viewport={{ once: true, margin: '-60px' }}
-        style={{ width: 460, flexShrink: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        viewport={{ once: true, margin: '-40px' }}
+        style={{ width: mob ? '100%' : 460, flexShrink: 0 }}
       >
         {visual}
       </motion.div>
@@ -855,6 +857,7 @@ function GoogleSignInButton() {
 }
 
 export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageProps) {
+  const mobile = useIsMobile();
   const { user } = useAuthStore();
   const isSignedIn = !!user;
 
@@ -872,35 +875,33 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         style={{
           position: 'sticky', top: 0, zIndex: 100,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 48px', height: 64,
-          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+          padding: mobile ? '0 16px' : '0 48px', height: 56,
+          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
           borderBottom: '1px solid #F0F0F0',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 8,
+            width: 28, height: 28, borderRadius: 7,
             background: '#18181B',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M3 8H13M8 3V13" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <span style={{ fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>Sketch</span>
+          <span style={{ fontWeight: 700, fontSize: mobile ? 15 : 17, letterSpacing: '-0.02em' }}>Sketch</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {isSignedIn ? (
             <>
-              <span style={{ fontSize: 14, color: '#52525B', fontWeight: 500 }}>
-                {user.name}
-              </span>
+              {!mobile && <span style={{ fontSize: 13, color: '#52525B', fontWeight: 500 }}>{user.name}</span>}
               <button onClick={onGoToApp} style={{
-                padding: '7px 18px', borderRadius: 8, border: 'none',
-                background: '#18181B', fontSize: 14, fontWeight: 600,
+                padding: mobile ? '6px 12px' : '7px 18px', borderRadius: 8, border: 'none',
+                background: '#18181B', fontSize: 13, fontWeight: 600,
                 color: '#fff', cursor: 'pointer',
-              }}>Open app →</button>
+              }}>{mobile ? 'Open →' : 'Open app →'}</button>
               <UserMenu />
             </>
           ) : (
@@ -912,44 +913,45 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section style={{
         maxWidth: 1100, margin: '0 auto',
-        padding: '96px 48px 80px',
-        display: 'flex', alignItems: 'center', gap: 64,
+        padding: mobile ? '48px 20px 40px' : '96px 48px 80px',
+        display: 'flex', alignItems: 'center', gap: mobile ? 0 : 64,
+        flexDirection: mobile ? 'column' : 'row',
       }}>
         <motion.div variants={stagger} initial="hidden" animate="show" style={{ flex: 1, minWidth: 0 }}>
-          <motion.div variants={fadeUp} style={{ marginBottom: 24 }}>
+          <motion.div variants={fadeUp} style={{ marginBottom: mobile ? 16 : 24 }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '4px 12px', borderRadius: 0,
+              padding: '4px 10px', borderRadius: 4,
               background: '#F4F4F5', color: '#52525B',
-              fontSize: 12, fontWeight: 600, letterSpacing: '0.02em',
+              fontSize: 11, fontWeight: 600, letterSpacing: '0.02em',
               border: '1px solid #E4E4E7',
             }}>
-              This project is made for educational purpose by Piyush Raj and to understand the engineering behind it.
+              Built for learning · exploring engineering behind canvas tools
             </span>
           </motion.div>
 
           <motion.h1 variants={fadeUp} style={{
-            fontSize: 58, fontWeight: 800, lineHeight: 1.06,
-            letterSpacing: '-0.04em', margin: '0 0 20px', color: '#09090B',
+            fontSize: mobile ? 34 : 58, fontWeight: 800, lineHeight: 1.08,
+            letterSpacing: '-0.03em', margin: '0 0 16px', color: '#09090B',
           }}>
             Design without<br />
             <span style={{ color: '#3B82F6' }}>boundaries.</span>
           </motion.h1>
 
           <motion.p variants={fadeUp} style={{
-            fontSize: 18, color: '#71717A', lineHeight: 1.65,
-            margin: '0 0 36px', maxWidth: 440,
+            fontSize: mobile ? 15 : 18, color: '#71717A', lineHeight: 1.6,
+            margin: `0 0 ${mobile ? '24px' : '36px'}`,
           }}>
             An infinite canvas for architects, designers, and engineers.
-            Draw, organise, and think clearly - all in one place.
+            Draw, organise, and think clearly — all in one place.
           </motion.p>
 
-          <motion.div variants={fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+          <motion.div variants={fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
             {isSignedIn ? (
               <button onClick={onGoToApp} style={{
-                padding: '13px 28px', borderRadius: 10, border: 'none',
+                padding: mobile ? '12px 22px' : '13px 28px', borderRadius: 10, border: 'none',
                 background: '#18181B', fontSize: 15, fontWeight: 600,
-                color: '#fff', cursor: 'pointer',
+                color: '#fff', cursor: 'pointer', width: mobile ? '100%' : undefined,
               }}>Open your workspace →</button>
             ) : (
               <GoogleSignInButton />
@@ -957,14 +959,14 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
           </motion.div>
         </motion.div>
 
-        <HeroPreview />
+        {!mobile && <HeroPreview />}
       </section>
 
       {/* ── Feature sections ─────────────────────────────────────────────────── */}
       <div style={{ borderTop: '1px solid #F0F0F0' }}>
 
         {/* Section intro */}
-        <div style={{ textAlign: 'center', padding: '80px 48px 0' }}>
+        <div style={{ textAlign: 'center', padding: mobile ? '40px 20px 0' : '80px 48px 0' }}>
           <motion.div
             initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55 }} viewport={{ once: true }}
@@ -975,7 +977,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
               display: 'block', marginBottom: 14,
             }}>Built for makers</span>
             <h2 style={{
-              fontSize: 44, fontWeight: 800, letterSpacing: '-0.035em',
+              fontSize: mobile ? 28 : 44, fontWeight: 800, letterSpacing: '-0.03em',
               margin: 0, color: '#09090B', lineHeight: 1.1,
             }}>
               Everything you need<br />to think visually
@@ -984,83 +986,62 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </div>
 
         {/* 1 — Infinite Canvas */}
-        <section style={{ padding: '100px 48px', background: '#fff' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <FeatureSection
-              label="Canvas"
-              title="Think without boundaries"
-              description="An infinite workspace that grows with your ideas. Sketch system diagrams, plan architecture, map user flows - then zoom out to see the complete picture. No edge, no limit, no constraint."
-              visual={<CanvasMockup />}
-              reverse={false}
-            />
+            <FeatureSection label="Canvas" title="Think without boundaries"
+              description="An infinite workspace that grows with your ideas. Sketch system diagrams, plan architecture, map user flows — then zoom out to see the complete picture."
+              visual={<CanvasMockup />} reverse={false} />
           </div>
         </section>
 
         {/* 2 — Sync */}
-        <section style={{ padding: '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <FeatureSection
-              label="Persistence"
-              title="Your work, always where you left it"
-              description="Every change is saved locally via IndexedDB for instant offline access, and synced to the cloud so your canvases are available on any device you sign in to. Nothing is ever lost."
-              visual={<SyncMockup />}
-              reverse={true}
-            />
+            <FeatureSection label="Persistence" title="Your work, always where you left it"
+              description="Every change is saved locally and synced to the cloud so your canvases are available on any device. Nothing is ever lost."
+              visual={<SyncMockup />} reverse={true} />
           </div>
         </section>
 
         {/* 3 — Visual Editing */}
-        <section style={{ padding: '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <FeatureSection
-              label="Editing"
-              title="Built for visual thinking"
-              description="Shapes, connectors, text, images, freehand strokes - every element type lives in the same canvas. Select, resize, rotate, reorder, group, and lock anything. A complete editing suite that stays out of your way."
-              visual={<ToolsMockup />}
-              reverse={false}
-            />
+            <FeatureSection label="Editing" title="Built for visual thinking"
+              description="Shapes, connectors, text, images, freehand strokes — every element lives in the same canvas. Select, resize, rotate, group, and lock anything."
+              visual={<ToolsMockup />} reverse={false} />
           </div>
         </section>
 
         {/* 4 — Pen */}
-        <section style={{ padding: '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <FeatureSection
-              label="Drawing"
-              title="Freehand input, precisely rendered"
-              description="Draw naturally with a stylus or mouse. Smooth bezier interpolation captures the fluidity of a real whiteboard. Mix freehand strokes with shapes, connectors, and text for expressive, mixed-media diagrams."
-              visual={<PenMockup />}
-              reverse={true}
-            />
+            <FeatureSection label="Drawing" title="Freehand input, precisely rendered"
+              description="Draw naturally with a stylus or finger. Smooth bezier interpolation captures the fluidity of a real whiteboard. Mix freehand strokes with shapes and text."
+              visual={<PenMockup />} reverse={true} />
           </div>
         </section>
 
         {/* 5 — Mermaid */}
-        <section style={{ padding: '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <FeatureSection
-              label="Diagrams"
-              title="Mermaid to diagram conversion"
-              description="Paste any Mermaid flowchart and it instantly becomes a fully editable set of canvas elements - shapes, arrows, and labels you can move, restyle, and extend. No image exports, no lock-in."
-              visual={<MermaidMockup />}
-              reverse={false}
-            />
+            <FeatureSection label="Diagrams" title="Mermaid to diagram conversion"
+              description="Paste any Mermaid flowchart and it instantly becomes fully editable canvas elements — shapes, arrows, and labels you can move, restyle, and extend."
+              visual={<MermaidMockup />} reverse={false} />
           </div>
         </section>
 
         {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-        <section style={{ padding: '80px 48px 100px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px 60px' : '80px 48px 100px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
-            <motion.div
-              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }} viewport={{ once: true }}
-              style={{ textAlign: 'center', marginBottom: 56 }}
+              style={{ textAlign: 'center', marginBottom: mobile ? 32 : 56 }}
             >
               <h3 style={{
-                fontSize: 34, fontWeight: 800, letterSpacing: '-0.03em',
-                color: '#09090B', margin: '0 0 12px',
+                fontSize: mobile ? 24 : 34, fontWeight: 800, letterSpacing: '-0.02em',
+                color: '#09090B', margin: '0 0 10px',
               }}>About This Project</h3>
-              <p style={{ fontSize: 16, color: '#71717A', margin: 0 }}>
+              <p style={{ fontSize: mobile ? 14 : 16, color: '#71717A', margin: 0 }}>
                 Things you might be curious about before diving in.
               </p>
             </motion.div>
@@ -1074,15 +1055,15 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
         transition={{ duration: 0.6 }} viewport={{ once: true }}
         style={{
-          padding: '100px 48px', textAlign: 'center',
+          padding: mobile ? '56px 20px' : '100px 48px', textAlign: 'center',
           background: '#09090B',
         }}
       >
         <h2 style={{
-          fontSize: 42, fontWeight: 800, letterSpacing: '-0.03em',
-          margin: '0 0 14px', color: '#fff',
+          fontSize: mobile ? 28 : 42, fontWeight: 800, letterSpacing: '-0.02em',
+          margin: '0 0 12px', color: '#fff',
         }}>Ready to start?</h2>
-        <p style={{ fontSize: 16, color: '#71717A', margin: '0 0 36px' }}>
+        <p style={{ fontSize: mobile ? 14 : 16, color: '#71717A', margin: '0 0 28px' }}>
           Free forever.
         </p>
         {isSignedIn ? (

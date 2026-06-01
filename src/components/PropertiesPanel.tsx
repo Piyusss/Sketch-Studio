@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { useCanvasStore } from '../store/canvasStore';
 import type { CanvasObject, RectObject, EllipseObject, DiamondObject, TextObject, ArrowObject, ArrowHead, PenObject, StrokeStyle } from '../types';
 import { spatialIndex } from '../engine/spatialIndex';
@@ -247,6 +248,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export function PropertiesPanel() {
+  const mobile = useIsMobile();
   const selectedIds = useCanvasStore((s) => s.selectedIds);
   const objects = useCanvasStore((s) => s.objects);
   const updateObject = useCanvasStore((s) => s.updateObject);
@@ -277,22 +279,30 @@ export function PropertiesPanel() {
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   };
 
-  return (
-    <div
-      style={{
+  const panelStyle: React.CSSProperties = mobile
+    ? {
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        width: '100%', maxHeight: '45vh',
+        background: '#ffffff', border: 'none',
+        borderTop: '1px solid #E4E4E7',
+        borderRadius: '16px 16px 0 0',
+        padding: '12px 16px env(safe-area-inset-bottom, 0)',
+        boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
+        zIndex: 200, fontFamily: 'Inter, system-ui, sans-serif',
+        overflowY: 'auto',
+      }
+    : {
         position: 'absolute', top: 16, right: 16,
-        width: 220,
-        background: '#ffffff',
-        border: '1px solid #E4E4E7',
-        borderRadius: 10,
+        width: 220, background: '#ffffff',
+        border: '1px solid #E4E4E7', borderRadius: 10,
         padding: '12px 14px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        zIndex: 100,
-        fontFamily: 'Inter, system-ui, sans-serif',
-        maxHeight: 'calc(100vh - 100px)',
-        overflowY: 'auto',
-      }}
-    >
+        zIndex: 100, fontFamily: 'Inter, system-ui, sans-serif',
+        maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
+      };
+
+  return (
+    <div style={panelStyle}>
       {/* Position */}
       <Section title="Position">
         <div style={row2}>

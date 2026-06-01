@@ -34,3 +34,39 @@ canvas {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 4px; }
+
+/* ── Responsive utilities ────────────────────────────────────────────────── */
+
+/* Toolbar: allow horizontal scroll on narrow screens so no button is lost */
+.toolbar-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.toolbar-scroll::-webkit-scrollbar { display: none; }
+
+/* Touch surface: let our pointer-event handlers own all gestures */
+.canvas-touch-surface {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (max-width: 767px) {
+  /* Workspace/file card grids – 1 col on tiny, 2 on small phones */
+  .workspace-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .file-grid      { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+
+  /* Modal dialogs */
+  .modal-box { width: calc(100vw - 32px) !important; max-width: 360px !important; }
+
+  /* Properties panel – slide up from bottom */
+  .props-panel-mobile {
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important;
+    width: 100% !important; max-width: 100% !important;
+    max-height: 50vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    overflow-y: auto !important;
+  }
+}

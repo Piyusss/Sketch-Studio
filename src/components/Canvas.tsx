@@ -123,6 +123,9 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
 
   const rafRef = useRef<number>(0);
   const needsRenderRef = useRef(false);
+
+  // Pinch-to-zoom: track all active pointer positions
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const [eraserPos, setEraserPos] = useState<{ x: number; y: number } | null>(null);
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
   const [rotateBadge, setRotateBadge] = useState<{ x: number; y: number; deg: number } | null>(null);
@@ -405,6 +408,8 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // Track all active pointers for pinch-to-zoom detection
+    activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (readOnly) {
       smRef.current.updateCamera(cameraRef.current);
@@ -435,6 +440,41 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
   }, [getRect, setCursor, readOnly]);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
+    // ── Pinch-to-zoom (two-finger gesture) ───────────────────────────────────
+    if (activePointersRef.current.size === 2 && activePointersRef.current.has(e.pointerId)) {
+      const prevPos = activePointersRef.current.get(e.pointerId)!;
+      // Find the other pointer
+      let otherPos: { x: number; y: number } | null = null;
+      activePointersRef.current.forEach((pos, id) => {
+        if (id !== e.pointerId) otherPos = pos as { x: number; y: number };
+      });
+      if (otherPos != null) {
+        const op = otherPos as { x: number; y: number };
+        const prevDist = Math.hypot(prevPos.x - op.x, prevPos.y - op.y);
+        const newDist  = Math.hypot(e.clientX - op.x, e.clientY - op.y);
+        if (prevDist > 0 && newDist > 0 && Math.abs(newDist - prevDist) > 0.5) {
+          const rect  = getRect();
+          const cx    = ((e.clientX + op.x) / 2) - rect.left;
+          const cy    = ((e.clientY + op.y) / 2) - rect.top;
+          // Map pinch scale to a wheel-like delta (positive = zoom out, negative = zoom in)
+          const delta = (prevDist - newDist) * 2.5;
+          smRef.current.updateCamera(cameraRef.current);
+          smRef.current.handleWheel(
+            new WheelEvent('wheel', { deltaY: delta, clientX: cx + rect.left, clientY: cy + rect.top, ctrlKey: true }),
+            rect,
+          );
+          needsRenderRef.current = true;
+        }
+      }
+      activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      return; // don't pass pinch moves to the state machine
+    }
+
+    // Track single-finger position
+    if (activePointersRef.current.has(e.pointerId)) {
+      activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
     if (readOnly) {
       smRef.current.updateCamera(cameraRef.current);
       smRef.current.handlePointerMove(e.nativeEvent, getRect());
@@ -530,6 +570,8 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
   }, [getRect, setCursor, readOnly]);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
+    activePointersRef.current.delete(e.pointerId);
+
     if (readOnly) {
       smRef.current.updateCamera(cameraRef.current);
       smRef.current.handlePointerUp(e.nativeEvent, getRect());
@@ -716,6 +758,7 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
   return (
     <div
       ref={containerRef}
+      className="canvas-touch-surface"
       style={{
         position: 'relative', width: '100%', height: '100%',
         overflow: 'hidden',

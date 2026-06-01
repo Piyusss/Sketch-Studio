@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserMenu } from './UserMenu';
 import { useWorkspaceStore, type FileMeta, type Workspace } from '../store/workspaceStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -167,6 +168,7 @@ interface FilesPageProps {
 }
 
 export function FilesPage({ workspace, onBack, onOpenFile }: FilesPageProps) {
+  const mobile = useIsMobile();
   const { createFile, deleteFile, renameFile, openFile, filesInWorkspace } = useWorkspaceStore();
   const files = filesInWorkspace(workspace.id).sort((a, b) => b.updatedAt - a.updatedAt);
 
@@ -191,7 +193,7 @@ export function FilesPage({ workspace, onBack, onOpenFile }: FilesPageProps) {
       <div style={{
         height: 56, background: '#fff', borderBottom: '1px solid #EEF2FF',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', position: 'sticky', top: 0, zIndex: 10,
+        padding: mobile ? '0 14px' : '0 32px', position: 'sticky', top: 0, zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* Back */}
@@ -217,7 +219,7 @@ export function FilesPage({ workspace, onBack, onOpenFile }: FilesPageProps) {
         <UserMenu />
       </div>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 32px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: mobile ? '20px 14px' : '40px 32px' }}>
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
@@ -267,7 +269,7 @@ export function FilesPage({ workspace, onBack, onOpenFile }: FilesPageProps) {
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: mobile ? 10 : 14 }}>
               {files.map((file) => (
                 <FileCard
                   key={file.id}
