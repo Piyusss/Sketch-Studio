@@ -12,10 +12,11 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)",  "dest": "/server/api.js" },
-    { "src": "/auth/(.*)", "dest": "/server/api.js" },
-    { "src": "/health",    "dest": "/server/api.js" },
+    { "src": "/api/(.*)",                 "dest": "/server/api.js" },
+    { "src": "/auth/google",              "dest": "/server/api.js" },
+    { "src": "/auth/google/callback",     "dest": "/server/api.js" },
+    { "src": "/health",                   "dest": "/server/api.js" },
     { "handle": "filesystem" },
-    { "src": "/(.*)",      "dest": "/index.html" }
+    { "src": "/(.*)",                     "dest": "/index.html" }
   ]
 }
