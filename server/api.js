@@ -370,14 +370,28 @@ app.put('/api/share/:token/canvas', async (req, rep) => {
   return { ok: true };
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// ── Start / Serverless export ─────────────────────────────────────────────────
+//
+// On Vercel the file is imported as a serverless function; calling app.listen()
+// would try to bind a port (which serverless environments don't allow).
+// We detect Vercel via the VERCEL env var that Vercel always injects, boot
+// Fastify's plugin system without binding, then export a handler that emits
+// each inbound request onto Fastify's underlying Node.js HTTP server.
+//
+// Locally (npm run server:dev) the else branch runs normally.
 
-const PORT = Number(process.env.PORT ?? 3001);
+if (process.env.VERCEL) {
+  // Pre-boot once (cached Promise) so the first real request isn't slow.
+  const boot = app.ready();
 
-app.listen({ port: PORT, host: '0.0.0.0' }, (err) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`API server running on http://localhost:${PORT}`);
-});
+  module.exports = async (req, res) => {
+    await boot;
+    app.server.emit('request', req, res);
+  };
+} else {
+  const PORT = Number(process.env.PORT ?? 3001);
+  app.listen({ port: PORT, host: '0.0.0.0' }, (err) => {
+    if (err) { console.error(err); process.exit(1); }
+    console.log(`API server running on http://localhost:${PORT}`);
+  });
+}

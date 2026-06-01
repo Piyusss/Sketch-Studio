@@ -1,6 +1,7 @@
 {
   "name": "sketch-server",
   "version": "1.0.0",
+  "type": "commonjs",
   "description": "Sketch backend: y-websocket + REST API + NeonDB persistence",
   "scripts": {
     "start": "node ws-server.js",

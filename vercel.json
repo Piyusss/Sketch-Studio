@@ -1,23 +1,21 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "env": {
-    "NODE_ENV": "production",
-    "VERCEL": "1"
-  },
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "https://your-api-backend.vercel.app/api/:path*"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     },
     {
-      "source": "/auth/:path*",
-      "destination": "https://your-api-backend.vercel.app/auth/:path*"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
+      "src": "server/api.js",
+      "use": "@vercel/node"
     }
+  ],
+  "routes": [
+    { "src": "/api/(.*)",  "dest": "/server/api.js" },
+    { "src": "/auth/(.*)", "dest": "/server/api.js" },
+    { "src": "/health",    "dest": "/server/api.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)",      "dest": "/index.html" }
   ]
 }
