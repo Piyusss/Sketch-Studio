@@ -805,9 +805,29 @@ interface LandingPageProps {
 }
 
 function GoogleSignInButton() {
-  // Link directly to the API server — a relative href would be caught by React
-  // Router's SPA handling before Vite's proxy ever gets a chance to forward it.
-  const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+  // Dynamically detect API server URL:
+  // 1. If VITE_API_URL is set in env (e.g., via Vercel env vars), use it
+  // 2. Otherwise, try to use the same domain/host as the frontend
+  // 3. Fall back to localhost:3001 for development
+  
+  let apiUrl = import.meta.env.VITE_API_URL;
+  
+  if (!apiUrl || apiUrl.includes('localhost')) {
+    // On production (Vercel, etc.), API is typically on same domain
+    // or use x-forwarded-proto/host headers if behind a proxy
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      // Use same protocol and hostname, but adjust port if needed
+      // For Vercel deployments, API might be on same domain or a backend subdomain
+      const proto = window.location.protocol; // https: or http:
+      const host = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      apiUrl = `${proto}//${host}${port}`;
+    } else {
+      // Fall back to the env or localhost
+      apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    }
+  }
+  
   return (
     <a
       href={`${apiUrl}/auth/google`}

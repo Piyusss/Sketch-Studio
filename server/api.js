@@ -11,8 +11,34 @@ const { query } = require('./db');
 const app = Fastify({ logger: false });
 
 const JWT_SECRET    = process.env.JWT_SECRET        ?? 'sketch-dev-secret-change-me';
-const FRONTEND_URL  = process.env.FRONTEND_URL       ?? 'http://localhost:5173';
-const CALLBACK_URL  = process.env.GOOGLE_CALLBACK_URL ?? 'http://localhost:3001/auth/google/callback';
+
+// Dynamic URL detection: Use environment variable if set, otherwise infer from request origin
+// This allows the same code to work on localhost, Vercel, and other deployments
+const getURLs = (req) => {
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  
+  // Try to get origin from environment first
+  let FRONTEND_URL = process.env.FRONTEND_URL;
+  let API_URL = process.env.API_URL || process.env.FRONTEND_URL; // API might be on same domain
+  
+  // If in production and URLs not explicitly set, try to infer from request
+  if (isProduction && !FRONTEND_URL && req) {
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    FRONTEND_URL = `${proto}://${host}`;
+    API_URL = FRONTEND_URL;
+  }
+  
+  // Fallback to localhost for development
+  FRONTEND_URL = FRONTEND_URL || 'http://localhost:5173';
+  API_URL = API_URL || 'http://localhost:3001';
+  
+  return { FRONTEND_URL, API_URL };
+};
+
+// For Google OAuth callback URL, use environment or construct from API_URL
+const CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || 
+  `${process.env.API_URL || 'http://localhost:3001'}/auth/google/callback`;
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 
@@ -52,10 +78,13 @@ app.addHook('preHandler', async (req, rep) => {
 // ── Google OAuth (redirect flow) ──────────────────────────────────────────────
 
 // Step 1 — redirect the browser to Google's consent screen
-app.get('/auth/google', async (_req, rep) => {
+app.get('/auth/google', async (req, rep) => {
+  const { FRONTEND_URL, API_URL } = getURLs(req);
+  const callbackUrl = process.env.GOOGLE_CALLBACK_URL || `${API_URL}/auth/google/callback`;
+  
   const params = new URLSearchParams({
     client_id:     process.env.GOOGLE_CLIENT_ID,
-    redirect_uri:  CALLBACK_URL,
+    redirect_uri:  callbackUrl,
     response_type: 'code',
     scope:         'openid email profile',
     prompt:        'select_account',
@@ -66,6 +95,9 @@ app.get('/auth/google', async (_req, rep) => {
 
 // Step 2 — Google redirects here with ?code=...
 app.get('/auth/google/callback', async (req, rep) => {
+  const { FRONTEND_URL, API_URL } = getURLs(req);
+  const callbackUrl = process.env.GOOGLE_CALLBACK_URL || `${API_URL}/auth/google/callback`;
+  
   const { code, error } = req.query;
   if (error || !code) {
     return rep.redirect(`${FRONTEND_URL}/?error=auth_failed`, 302);
@@ -80,7 +112,7 @@ app.get('/auth/google/callback', async (req, rep) => {
         code,
         client_id:     process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri:  CALLBACK_URL,
+        redirect_uri:  callbackUrl,
         grant_type:    'authorization_code',
       }).toString(),
     });
