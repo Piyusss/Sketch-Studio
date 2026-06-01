@@ -6,11 +6,6 @@
     "NODE_ENV": "production",
     "VERCEL": "1"
   },
-  "functions": {
-    "server/api.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/:path*",
