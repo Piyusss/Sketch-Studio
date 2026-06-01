@@ -1,0 +1,20 @@
+{
+  "name": "sketch-server",
+  "version": "1.0.0",
+  "description": "Sketch backend: y-websocket + REST API + NeonDB persistence",
+  "scripts": {
+    "start": "node ws-server.js",
+    "start:api": "node api.js",
+    "dev": "node --watch ws-server.js",
+    "dev:api": "node --watch api.js",
+    "db:init": "psql $DATABASE_URL -f schema.sql"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "fastify": "^4.28.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.13.3",
+    "ws": "^8.18.0",
+    "y-websocket": "^1.5.4"
+  }
+}
