@@ -11,6 +11,7 @@ import { InteractionStateMachine } from '../interaction/stateMachine';
 import { handleKeyboardShortcut } from '../interaction/shortcuts';
 import { getCameraAABB } from '../utils/math';
 import { createImageObjectFromFile } from '../utils/clipboard';
+import { stripBlobUrls } from '../utils/stripBlobUrls';
 import { api } from '../lib/api';
 import { historyManager } from '../history/historyManager';
 
@@ -196,24 +197,8 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
     if (!fileId) return;
     const store = useCanvasStore.getState();
 
-    // Strip blob: URLs before persisting — they are session-local and cannot
-    // be accessed by any other device or shared-link viewer.  Images created
-    // after the clipboard.ts fix already use portable data URLs; this guard
-    // silently skips any legacy blob: src that may exist in the current session.
-    const safeObjects: Record<string, unknown> = {};
-    for (const [id, obj] of Object.entries(store.objects)) {
-      const o = obj as { type?: string; src?: string };
-      if (o.type === 'image' && typeof o.src === 'string' && o.src.startsWith('blob:')) {
-        // Replace the unportable blob: src with an empty string so the image
-        // renders as a placeholder instead of breaking the whole canvas load.
-        safeObjects[id] = { ...obj, src: '' };
-      } else {
-        safeObjects[id] = obj;
-      }
-    }
-
     api.canvas.save(fileId, {
-      objects:    safeObjects,
+      objects:    stripBlobUrls(store.objects),
       bg_color:   store.canvasBg,
       grid_style: store.canvasGrid,
     }).catch(() => { /* silent — offline */ });
@@ -227,21 +212,12 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
     return () => {
       unsub();
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      // Final save on unmount (same blob: guard as saveCanvas above)
+      // Final save on unmount
       const fileId = useWorkspaceStore.getState().activeFileId;
       if (fileId) {
         const s = useCanvasStore.getState();
-        const safeObjects: Record<string, unknown> = {};
-        for (const [id, obj] of Object.entries(s.objects)) {
-          const o = obj as { type?: string; src?: string };
-          if (o.type === 'image' && typeof o.src === 'string' && o.src.startsWith('blob:')) {
-            safeObjects[id] = { ...obj, src: '' };
-          } else {
-            safeObjects[id] = obj;
-          }
-        }
         api.canvas.save(fileId, {
-          objects:    safeObjects,
+          objects:    stripBlobUrls(s.objects),
           bg_color:   s.canvasBg,
           grid_style: s.canvasGrid,
         }).catch(() => {});

@@ -85,7 +85,6 @@ export async function openYDocument(docId: string): Promise<void> {
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       useDocumentStore.getState().setSaveStatus('saved');
-      useDocumentStore.getState().touchDocument(docId);
     }, 1500);
   });
 }

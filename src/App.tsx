@@ -16,6 +16,7 @@ import { useCanvasStore } from './store/canvasStore';
 import type { CanvasGridStyle } from './types';
 import { openYDocument, closeYDocument } from './collaboration/yDocument';
 import { api } from './lib/api';
+import { stripBlobUrls } from './utils/stripBlobUrls';
 import type { CanvasObject } from './types';
 
 // ── Shared loading spinner ─────────────────────────────────────────────────
@@ -222,7 +223,7 @@ function EditorRoute() {
       if (fid) {
         const s = useCanvasStore.getState();
         api.canvas.save(fid, {
-          objects:    s.objects as Record<string, unknown>,
+          objects:    stripBlobUrls(s.objects),
           bg_color:   s.canvasBg,
           grid_style: s.canvasGrid,
         }).catch(() => {});

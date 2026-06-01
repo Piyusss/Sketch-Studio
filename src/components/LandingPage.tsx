@@ -764,41 +764,6 @@ function FaqList() {
   );
 }
 
-// ── Small feature cards (kept for reference, not rendered) ────────────────────
-
-const SMALL_FEATURES = [
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M10 2.5A7.5 7.5 0 1 0 17.5 10" stroke="#18181B" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M14 4.5H17.5M17.5 4.5V8M17.5 4.5L13.5 8.5" stroke="#18181B" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    title: 'Cloud backup',
-    desc: 'Every canvas is saved to the cloud automatically. Sign in from any device and pick up exactly where you left off.',
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M4 8l-2 2 2 2M16 8l2 2-2 2M8 16l2 2 2-2M8 4l2-2 2 2" stroke="#18181B" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-        <rect x="6" y="6" width="8" height="8" rx="1.5" stroke="#18181B" strokeWidth="1.3" />
-      </svg>
-    ),
-    title: 'Unlimited undo',
-    desc: 'Full command history lets you undo and redo every change — drawing, reshaping, reordering, and more.',
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <rect x="2" y="5" width="16" height="10" rx="2.5" stroke="#18181B" strokeWidth="1.4" />
-        <path d="M5 9h1M8 9h1M11 9h1M14 9h1M5 12h1M8 12h4M13 12h1" stroke="#18181B" strokeWidth="1.2" strokeLinecap="round" />
-      </svg>
-    ),
-    title: 'Keyboard-first',
-    desc: 'Every tool has a single-key shortcut. V, H, R, P, E, L — reach anything without touching the mouse.',
-  },
-];
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface LandingPageProps {
