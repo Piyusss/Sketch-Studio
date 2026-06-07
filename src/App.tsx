@@ -11,6 +11,7 @@ import { ZoomControls } from './components/ZoomControls';
 import { Minimap } from './components/Minimap';
 import { CommandPalette } from './components/CommandPalette';
 import { LandingPage } from './components/LandingPage';
+import { DocsPage } from './components/DocsPage';
 import { WorkspacesPage } from './components/WorkspacesPage';
 import { FilesPage } from './components/FilesPage';
 import { ShareExportBar } from './components/ShareExportBar';
@@ -318,6 +319,7 @@ export function App() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.key}>
         <Route path="/"                                         element={<LandingRoute />} />
+        <Route path="/docs"                                     element={<DocsPage />} />
         <Route path="/auth/callback"                            element={<AuthCallbackRoute />} />
         <Route path="/share/:token"                             element={<SharedCanvasPage />} />
         <Route path="/workspaces"                               element={<RequireAuth><WorkspacesRoute /></RequireAuth>} />
