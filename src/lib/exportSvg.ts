@@ -97,7 +97,7 @@ function arrowHeadPolygon(tipX: number, tipY: number, angle: number, size: numbe
 }
 
 function arrowSvg(o: ArrowObject): string {
-  const headSize = Math.max(9, o.strokeWidth * 4);
+  const headSize = Math.max(13, o.strokeWidth * 5);
   let cpx = 0, cpy = 0, startAngle: number, endAngle: number;
   if (o.curved && o.bendOffset !== 0) {
     const mx = (o.x1 + o.x2) / 2, my = (o.y1 + o.y2) / 2;

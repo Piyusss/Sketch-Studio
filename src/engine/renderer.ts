@@ -493,7 +493,7 @@ function drawArrow(ctx: CanvasRenderingContext2D, obj: ArrowObject, camera: Came
   const sx2 = toSX(obj.x2), sy2 = toSY(obj.y2);
 
   const lineW = obj.strokeWidth * camera.zoom;
-  const headSize = Math.max(10, lineW * 3.5);
+  const headSize = Math.max(14, lineW * 5);
 
   // Compute control point and end tangents
   let cpx = 0, cpy = 0;

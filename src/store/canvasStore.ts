@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import type { Camera, CanvasObject, GroupObject, Layer, Tool, StrokeStyle, CanvasGridStyle } from '../types';
 import { computeUnionAABB } from '../utils/math';
 import { spatialIndex } from '../engine/spatialIndex';
+import { defaultInkColor } from '../utils/color';
 
 const DEFAULT_LAYER: Layer = {
   id: 'default',
@@ -137,6 +138,9 @@ function loadBg(): string {
   return localStorage.getItem('sketch-canvas-bg') ?? DEFAULT_BG;
 }
 
+const initialBg = loadBg();
+const initialInk = defaultInkColor(initialBg);
+
 function loadGrid(): CanvasGridStyle {
   return (localStorage.getItem('sketch-canvas-grid') as CanvasGridStyle) ?? 'dots';
 }
@@ -155,13 +159,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   textFontFamily: 'Inter, system-ui, sans-serif',
   textFontSize: 20,
   textFontWeight: 400,
-  textColor: '#111827',
+  textColor: initialInk,
   textAlign: 'left' as const,
-  canvasBg: loadBg(),
+  canvasBg: initialBg,
   canvasGrid: loadGrid(),
   laserSize: 4,
   laserGlow: 20,
-  penColor: '#374151',
+  penColor: initialInk,
   penWidth: 2,
   penStyle: 'solid' as StrokeStyle,
   penRecentColors: loadRecentColors(),
@@ -385,7 +389,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   setCanvasBg: (color) => {
     localStorage.setItem('sketch-canvas-bg', color);
-    set({ canvasBg: color });
+    set((state) => {
+      const prevInk = defaultInkColor(state.canvasBg);
+      const nextInk = defaultInkColor(color);
+      const next: Partial<CanvasState> = { canvasBg: color };
+      // Only swap textColor/penColor when they still hold the auto-picked
+      // ink for the previous background — never override a user's explicit choice.
+      if (state.textColor === prevInk) next.textColor = nextInk;
+      if (state.penColor === prevInk) next.penColor = nextInk;
+      return next;
+    });
   },
 
   setCanvasGrid: (style) => {

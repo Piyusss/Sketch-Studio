@@ -26,6 +26,7 @@ import { AddObjectCommand, RemoveObjectsCommand } from '../history/commands';
 import { zoomTowardPoint } from '../engine/camera';
 import { useCanvasStore } from '../store/canvasStore';
 import { computeSnap } from '../engine/snapping';
+import { defaultInkColor } from '../utils/color';
 
 // ── Eraser helpers ────────────────────────────────────────────────────────────
 
@@ -694,6 +695,7 @@ export class InteractionStateMachine {
     const id = nanoid();
     this.drawObjId = id;
     const now = Date.now();
+    const ink = defaultInkColor(store.canvasBg);
     const base = {
       id, x: this.drawStartWorld.x, y: this.drawStartWorld.y,
       width: 1, height: 1, rotation: 0, opacity: 1,
@@ -702,9 +704,9 @@ export class InteractionStateMachine {
     };
     let obj: CanvasObject;
     if (tool === 'ellipse') {
-      obj = { ...base, type: 'ellipse', fill: 'none', stroke: '#374151', strokeWidth: 1.5 } as EllipseObject;
+      obj = { ...base, type: 'ellipse', fill: 'none', stroke: ink, strokeWidth: 1.5 } as EllipseObject;
     } else if (tool === 'diamond') {
-      obj = { ...base, type: 'diamond', fill: 'none', stroke: '#374151', strokeWidth: 1.5 } as DiamondObject;
+      obj = { ...base, type: 'diamond', fill: 'none', stroke: ink, strokeWidth: 1.5 } as DiamondObject;
     } else if (tool === 'frame') {
       // Frames sit behind everything so their contents render on top.
       const minZ = Object.values(store.objects).reduce((m, o) => Math.min(m, o.zIndex), 0);
@@ -714,7 +716,7 @@ export class InteractionStateMachine {
         name: `Frame ${n + 1}`, fill: 'none', stroke: '#9CA3AF', strokeWidth: 1.5,
       } as FrameObject;
     } else {
-      obj = { ...base, type: 'rect', fill: 'none', stroke: '#374151', strokeWidth: 1.5, cornerRadius: 0 } as RectObject;
+      obj = { ...base, type: 'rect', fill: 'none', stroke: ink, strokeWidth: 1.5, cornerRadius: 0 } as RectObject;
     }
     store.addObject(obj);
     store.setSelectedIds([id]);
@@ -774,7 +776,7 @@ export class InteractionStateMachine {
       zIndex: Object.keys(store.objects).length, createdAt: now, updatedAt: now,
       content: '', fontFamily: store.textFontFamily ?? 'Inter, system-ui, sans-serif',
       fontSize: store.textFontSize ?? 20, fontWeight: store.textFontWeight ?? 400,
-      color: store.textColor ?? '#111827', align: store.textAlign ?? 'left',
+      color: store.textColor ?? defaultInkColor(store.canvasBg), align: store.textAlign ?? 'left',
     };
     store.addObject(obj);
     spatialIndex.insert(obj);
@@ -878,7 +880,7 @@ export class InteractionStateMachine {
       curved: false, bendOffset: 0,
       startHead: 'none',
       endHead: useCanvasStore.getState().activeTool === 'line' ? 'none' : 'arrow',
-      stroke: '#374151', strokeWidth: 1.5,
+      stroke: defaultInkColor(store.canvasBg), strokeWidth: 1.5,
     };
     store.addObject(obj);
     store.setSelectedIds([id]);
