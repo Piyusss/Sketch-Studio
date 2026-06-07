@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useCanvasStore } from '../store/canvasStore';
 import type { Tool, StrokeStyle } from '../types';
 import { historyManager } from '../history/historyManager';
@@ -55,6 +56,7 @@ import {
   TbLockOpen,
   // Diagram / Mermaid
   TbHierarchy2,         // Insert diagram — hierarchy / flowchart tree
+  TbChevronDown,        // Dropdown indicator — small chevron beside the shape icon
 } from 'react-icons/tb';
 
 const ICO = 16; // uniform icon size (px) across the whole toolbar
@@ -257,12 +259,17 @@ export function Toolbar() {
   const isGroup = firstSelected?.type === 'group';
   const canGroup = selectedIds.length >= 2;
 
-  // Shapes dropdown
+  // Shapes dropdown — rendered through a portal (see below) since the toolbar
+  // scrolls horizontally (`overflow-x: auto`), which would otherwise clip an
+  // absolutely-positioned panel and make every shape but the active one
+  // unreachable.
   const [shapeOpen, setShapeOpen] = useState(false);
+  const [shapeMenuPos, setShapeMenuPos] = useState({ top: 0, left: 0 });
   const [lastShape, setLastShape] = useState<Tool>(() =>
     (localStorage.getItem('sketch-last-shape') as Tool) ?? 'rect',
   );
-  const shapeRef = useRef<HTMLDivElement>(null);
+  const shapeBtnRef = useRef<HTMLButtonElement>(null);
+  const shapeMenuRef = useRef<HTMLDivElement>(null);
   const isShapeActive = SHAPE_IDS.has(activeTool);
   const currentShapeDef = SHAPE_TOOLS.find((s) => s.id === lastShape) ?? SHAPE_TOOLS[0];
 
@@ -274,16 +281,28 @@ export function Toolbar() {
     }
   }, [activeTool]);
 
-  // Close dropdown on outside click
+  function openShapeMenu() {
+    const r = shapeBtnRef.current?.getBoundingClientRect();
+    if (r) setShapeMenuPos({ top: r.bottom + 6, left: r.left + r.width / 2 });
+    setShapeOpen(true);
+  }
+
+  // Close dropdown on outside click (checks both the trigger button and the
+  // portaled menu, since the menu lives outside the toolbar in the DOM tree)
   useEffect(() => {
     if (!shapeOpen) return;
     function onDown(e: MouseEvent) {
-      if (shapeRef.current && !shapeRef.current.contains(e.target as Node)) {
-        setShapeOpen(false);
-      }
+      const t = e.target as Node;
+      if (shapeBtnRef.current?.contains(t)) return;
+      if (shapeMenuRef.current?.contains(t)) return;
+      setShapeOpen(false);
     }
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    window.addEventListener('resize', () => setShapeOpen(false));
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      window.removeEventListener('resize', () => setShapeOpen(false));
+    };
   }, [shapeOpen]);
 
   function selectShape(id: Tool) {
@@ -392,42 +411,42 @@ export function Toolbar() {
       <Divider />
 
       {/* ── Shapes dropdown ──────────────────────────────────────────── */}
-      <div ref={shapeRef} style={{ position: 'relative' }}>
-        {/* Main shape button — click = use lastShape */}
-        <button
-          style={{
-            ...(isShapeActive ? btnActive : btnBase),
-            position: 'relative', paddingRight: 16,
-          }}
-          onClick={() => {
-            if (activeTool === lastShape) { setShapeOpen((v) => !v); }
-            else { setActiveTool(lastShape); setShapeOpen(false); }
-          }}
-          title={`${currentShapeDef.label}${currentShapeDef.shortcut ? ` (${currentShapeDef.shortcut})` : ''} — click ▾ for more shapes`}
-        >
-          {currentShapeDef.icon}
-          {/* Tiny dropdown indicator */}
-          <span style={{
-            position: 'absolute', bottom: 3, right: 3,
-            fontSize: 6, lineHeight: 1, opacity: 0.5, pointerEvents: 'none',
-          }}>▾</span>
-        </button>
+      {/* Main shape button — click = use lastShape, click again = open menu */}
+      <button
+        ref={shapeBtnRef}
+        style={{
+          ...(isShapeActive ? btnActive : btnBase),
+          width: 'auto', gap: 2, padding: '0 6px 0 8px',
+        }}
+        onClick={() => {
+          if (activeTool === lastShape) { shapeOpen ? setShapeOpen(false) : openShapeMenu(); }
+          else { setActiveTool(lastShape); setShapeOpen(false); }
+        }}
+        title={`${currentShapeDef.label}${currentShapeDef.shortcut ? ` (${currentShapeDef.shortcut})` : ''} — click the arrow for more shapes`}
+      >
+        {currentShapeDef.icon}
+        <TbChevronDown size={12} style={{ opacity: 0.6 }} />
+      </button>
 
-        {/* Dropdown */}
+      {/* Dropdown — portaled to <body> so the toolbar's horizontal-scroll
+          overflow can't clip it (which previously made every shape but the
+          active one unreachable) */}
+      {createPortal(
         <AnimatePresence>
           {shapeOpen && (
             <motion.div
+              ref={shapeMenuRef}
               initial={{ opacity: 0, y: -6, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.95 }}
               transition={{ duration: 0.13, ease: 'easeOut' }}
               style={{
-                position: 'absolute', top: 'calc(100% + 6px)', left: '50%',
+                position: 'fixed', top: shapeMenuPos.top, left: shapeMenuPos.left,
                 transform: 'translateX(-50%)',
                 background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
                 borderRadius: 10, padding: 4,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                zIndex: 200, minWidth: 168,
+                zIndex: 300, minWidth: 168,
                 fontFamily: 'Inter, system-ui, sans-serif',
               }}
             >
@@ -459,8 +478,9 @@ export function Toolbar() {
               })}
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
+        </AnimatePresence>,
+        document.body,
+      )}
 
       <Divider />
 
