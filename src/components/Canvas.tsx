@@ -11,6 +11,7 @@ import { spatialIndex } from '../engine/spatialIndex';
 import { InteractionStateMachine } from '../interaction/stateMachine';
 import { handleKeyboardShortcut } from '../interaction/shortcuts';
 import { getCameraAABB } from '../utils/math';
+import { measureTextBox } from '../utils/textMetrics';
 import { createImageObjectFromFile } from '../utils/clipboard';
 import { stripBlobUrls } from '../utils/stripBlobUrls';
 import { api } from '../lib/api';
@@ -653,10 +654,10 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
     const obj = useCanvasStore.getState().objects[id] as import('../types').TextObject | undefined;
     if (!obj || obj.type !== 'text') return;
 
-    // Measure final world-space size from the textarea
-    const zoom = cameraRef.current.zoom;
-    const worldW = Math.max(1, textEditorRef.current.scrollWidth / zoom);
-    const worldH = Math.max(1, textEditorRef.current.scrollHeight / zoom);
+    // Measure world-space size the same way `drawText` lays out glyphs, so the
+    // stored bbox (and selection outline) always matches what's rendered —
+    // the textarea's DOM layout (with its enforced min-width) doesn't.
+    const { width: worldW, height: worldH } = measureTextBox({ ...obj, content });
 
     if (textIsNewRef.current) {
       if (!content.trim()) {

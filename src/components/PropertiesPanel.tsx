@@ -4,6 +4,7 @@ import { useCanvasStore } from '../store/canvasStore';
 import type { CanvasObject, RectObject, EllipseObject, DiamondObject, TextObject, ArrowObject, ArrowHead, PenObject, StrokeStyle } from '../types';
 import { spatialIndex } from '../engine/spatialIndex';
 import { computeArrowBBox } from '../utils/math';
+import { measureTextBox } from '../utils/textMetrics';
 import { ColorPicker } from './ColorPicker';
 import { FONT_FAMILIES, FONT_CATEGORIES } from '../lib/fonts';
 
@@ -345,7 +346,16 @@ export function PropertiesPanel() {
           if (changes.align       !== undefined) s.setTextAlign(changes.align as 'left' | 'center' | 'right');
         };
         const upd = (changes: Partial<TextObject>) => {
-          update(changes as Partial<CanvasObject>);
+          // Font/line-height changes shift glyph layout — recompute the bbox
+          // so the selection outline keeps hugging the rendered text instead
+          // of drifting out of sync with it.
+          const metricKeys: (keyof TextObject)[] = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight'];
+          let next = changes;
+          if (metricKeys.some((k) => k in changes)) {
+            const merged = { ...t, ...changes };
+            next = { ...changes, ...measureTextBox(merged) };
+          }
+          update(next as Partial<CanvasObject>);
           syncDefaults(changes);
         };
 
