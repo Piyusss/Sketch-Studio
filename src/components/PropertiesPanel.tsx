@@ -290,7 +290,7 @@ export function PropertiesPanel() {
         padding: '12px 16px env(safe-area-inset-bottom, 0)',
         boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
         zIndex: 200, fontFamily: 'Inter, system-ui, sans-serif',
-        overflowY: 'auto',
+        overflowY: 'auto', overflowX: 'hidden',
       }
     : {
         position: 'absolute', top: 16, right: 16,
@@ -299,18 +299,21 @@ export function PropertiesPanel() {
         padding: '12px 14px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
         zIndex: 100, fontFamily: 'Inter, system-ui, sans-serif',
-        maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
+        maxHeight: 'calc(100vh - 100px)', overflowY: 'auto', overflowX: 'hidden',
       };
 
   return (
     <div style={panelStyle}>
-      {/* Size */}
-      <Section title="Size">
-        <div style={row2}>
-          <NumInput label="W" value={avg('width')} onChange={(v) => update({ width: Math.max(1, v) })} />
-          <NumInput label="H" value={avg('height')} onChange={(v) => update({ height: Math.max(1, v) })} />
-        </div>
-      </Section>
+      {/* Size — text resizes only via its on-canvas handle, to keep the
+          stored bbox in sync with the rendered glyphs */}
+      {!(allSameType && first.type === 'text') && (
+        <Section title="Size">
+          <div style={row2}>
+            <NumInput label="W" value={avg('width')} onChange={(v) => update({ width: Math.max(1, v) })} />
+            <NumInput label="H" value={avg('height')} onChange={(v) => update({ height: Math.max(1, v) })} />
+          </div>
+        </Section>
+      )}
 
       {/* Appearance */}
       {allSameType && (first.type === 'rect' || first.type === 'ellipse' || first.type === 'diamond') && (
@@ -376,11 +379,6 @@ export function PropertiesPanel() {
 
         return (
           <Section title="Text">
-            {/* Double-click hint */}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
-              Double-click a text element to edit it on the canvas.
-            </div>
-
             {/* Font family */}
             <div>
               <div style={label}>Font</div>
@@ -452,20 +450,6 @@ export function PropertiesPanel() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            {/* Line height */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Line height</span>
-              <input
-                type="range" min={0.8} max={3} step={0.05}
-                value={t.lineHeight ?? 1.25}
-                onChange={(e) => upd({ lineHeight: parseFloat(e.target.value) })}
-                style={{ flex: 1 }}
-              />
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 28, textAlign: 'right' }}>
-                {(t.lineHeight ?? 1.25).toFixed(2)}
-              </span>
             </div>
           </Section>
         );
