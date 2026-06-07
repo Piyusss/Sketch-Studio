@@ -644,15 +644,6 @@ export function PropertiesPanel() {
           </span>
         </div>
       </Section>
-
-      {/* Rotation */}
-      <Section title="Rotation">
-        <NumInput
-          label="Angle (°)"
-          value={avg('rotation')}
-          onChange={(v) => update({ rotation: v })}
-        />
-      </Section>
     </div>
   );
 }
