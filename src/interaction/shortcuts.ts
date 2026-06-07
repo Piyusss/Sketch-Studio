@@ -7,6 +7,7 @@ import { spatialIndex } from '../engine/spatialIndex';
 import { copyToClipboard, pasteFromClipboard } from '../utils/clipboard';
 import { clamp } from '../utils/math';
 import { MIN_ZOOM, MAX_ZOOM } from '../engine/camera';
+import { zoomToFit } from '../engine/cameraControl';
 
 type Handler = (camera: Camera) => void;
 
@@ -43,11 +44,13 @@ const registry: Record<string, Handler> = {
   'd': () => useCanvasStore.getState().setActiveTool('diamond'),
   'e': () => useCanvasStore.getState().setActiveTool('eraser'),
   'l': () => useCanvasStore.getState().setActiveTool('laser'),
+  'f': () => useCanvasStore.getState().setActiveTool('frame'),
 
   'ctrl+=': (cam) => { cam.targetZoom = clamp(cam.targetZoom * 1.25, MIN_ZOOM, MAX_ZOOM); },
   'ctrl+-': (cam) => { cam.targetZoom = clamp(cam.targetZoom * 0.8, MIN_ZOOM, MAX_ZOOM); },
   'ctrl+0': (cam) => { cam.targetZoom = 1; cam.targetX = -200; cam.targetY = -150; },
   'ctrl+shift+h': (cam) => { cam.targetZoom = 1; cam.targetX = -200; cam.targetY = -150; },
+  'shift+1': () => zoomToFit(Object.values(useCanvasStore.getState().objects)),
 
   'ctrl+d': () => duplicateSelected(),
 
@@ -134,7 +137,9 @@ export function handleKeyboardShortcut(e: KeyboardEvent, camera: Camera): void {
   let key = '';
   if (e.ctrlKey || e.metaKey) key += 'ctrl+';
   if (e.shiftKey) key += 'shift+';
-  key += e.key.toLowerCase();
+  // Use the physical digit for number keys so Shift+1 isn't read as '!' (layout-dependent)
+  const mainKey = /^Digit[0-9]$/.test(e.code) ? e.code.slice(5) : e.key.toLowerCase();
+  key += mainKey;
   if (key === 'ctrl++') key = 'ctrl+=';
 
   const handler = registry[key];

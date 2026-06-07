@@ -49,13 +49,26 @@ async function ensureImagesLoaded(srcs: string[], timeoutMs = 4000): Promise<voi
   ]);
 }
 
-export async function exportCanvasToPng(options: ExportOptions = {}): Promise<ExportResult> {
-  const { filename = 'sketch', scale = 2, padding = 40, background = true } = options;
+export interface RenderedExport {
+  canvas: HTMLCanvasElement;
+  width: number;   // device pixels
+  height: number;  // device pixels
+  worldWidth: number;  // content + padding, world units (= CSS pixels at scale 1)
+  worldHeight: number;
+}
+
+/**
+ * Render the current canvas content to an offscreen canvas at the requested
+ * pixel density. Shared by PNG and PDF export. Returns null reason on failure.
+ */
+export async function renderExportCanvas(
+  options: ExportOptions = {},
+): Promise<{ ok: true; result: RenderedExport } | { ok: false; reason: ExportResult['reason'] }> {
+  const { scale = 2, padding = 40, background = true } = options;
 
   const store = useCanvasStore.getState();
   const all = store.objects;
 
-  // Top-level, visible objects (group children are painted via their group)
   const top = Object.values(all)
     .filter((o) => o.visible && !o.parentId)
     .sort((a, b) => a.zIndex - b.zIndex);
@@ -65,8 +78,10 @@ export async function exportCanvasToPng(options: ExportOptions = {}): Promise<Ex
   await ensureImagesLoaded(collectImageSrcs(Object.values(all), all));
 
   const bbox = computeUnionAABB(top);
-  const W = Math.max(1, Math.ceil((bbox.width + padding * 2) * scale));
-  const H = Math.max(1, Math.ceil((bbox.height + padding * 2) * scale));
+  const worldWidth = bbox.width + padding * 2;
+  const worldHeight = bbox.height + padding * 2;
+  const W = Math.max(1, Math.ceil(worldWidth * scale));
+  const H = Math.max(1, Math.ceil(worldHeight * scale));
 
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -74,7 +89,6 @@ export async function exportCanvasToPng(options: ExportOptions = {}): Promise<Ex
   const ctx = canvas.getContext('2d');
   if (!ctx) return { ok: false, reason: 'no-context' };
 
-  // Camera maps world → pixels: zoom = scale, origin offset by padding.
   const cam: Camera = {
     x: bbox.x - padding,
     y: bbox.y - padding,
@@ -85,6 +99,15 @@ export async function exportCanvasToPng(options: ExportOptions = {}): Promise<Ex
   };
 
   renderForExport(ctx, top, all, cam, W, H, background ? store.canvasBg : undefined);
+  return { ok: true, result: { canvas, width: W, height: H, worldWidth, worldHeight } };
+}
+
+export async function exportCanvasToPng(options: ExportOptions = {}): Promise<ExportResult> {
+  const { filename = 'sketch' } = options;
+
+  const rendered = await renderExportCanvas(options);
+  if (!rendered.ok) return { ok: false, reason: rendered.reason };
+  const { canvas } = rendered.result;
 
   return new Promise<ExportResult>((resolve) => {
     try {

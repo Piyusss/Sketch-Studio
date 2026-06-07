@@ -1,6 +1,6 @@
-export type Tool = 'select' | 'pan' | 'rect' | 'ellipse' | 'diamond' | 'line' | 'text' | 'image' | 'pen' | 'arrow' | 'eraser' | 'laser';
+export type Tool = 'select' | 'pan' | 'rect' | 'ellipse' | 'diamond' | 'line' | 'text' | 'image' | 'pen' | 'arrow' | 'eraser' | 'laser' | 'frame';
 
-export type ObjectType = 'rect' | 'ellipse' | 'diamond' | 'text' | 'group' | 'image' | 'pen' | 'arrow';
+export type ObjectType = 'rect' | 'ellipse' | 'diamond' | 'text' | 'group' | 'image' | 'pen' | 'arrow' | 'frame';
 
 export type ArrowHead = 'none' | 'arrow' | 'dot';
 
@@ -102,7 +102,15 @@ export interface ArrowObject extends BaseObject {
   strokeWidth: number;
 }
 
-export type CanvasObject = RectObject | EllipseObject | DiamondObject | TextObject | GroupObject | ImageObject | PenObject | ArrowObject;
+export interface FrameObject extends BaseObject {
+  type: 'frame';
+  name: string;
+  fill: string;        // subtle background fill, or 'none'
+  stroke: string;
+  strokeWidth: number;
+}
+
+export type CanvasObject = RectObject | EllipseObject | DiamondObject | TextObject | GroupObject | ImageObject | PenObject | ArrowObject | FrameObject;
 
 export interface Camera {
   x: number;

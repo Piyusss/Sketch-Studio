@@ -124,13 +124,13 @@ export function BgPicker() {
       {open && (
         <div style={{
           position: 'absolute', bottom: 40, left: 0,
-          background: '#fff', border: '1px solid #E4E4E7',
-          borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.13)',
+          background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
+          borderRadius: 12, boxShadow: 'var(--panel-shadow-lg)',
           padding: '12px 14px', width: 236,
         }}>
 
           {/* Grid style */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
             Background style
           </div>
           <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
@@ -144,9 +144,9 @@ export function BgPicker() {
                   style={{
                     flex: 1, padding: '8px 4px 6px',
                     borderRadius: 8, cursor: 'pointer',
-                    border: `1.5px solid ${active ? '#6366F1' : '#E4E4E7'}`,
-                    background: active ? '#EEF2FF' : '#FAFAFA',
-                    color: active ? '#4F46E5' : '#71717A',
+                    border: `1.5px solid ${active ? 'var(--active-fg)' : 'var(--panel-border)'}`,
+                    background: active ? 'var(--active-bg)' : 'var(--panel-bg-2)',
+                    color: active ? 'var(--active-fg)' : 'var(--text-faint)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                     transition: 'border-color 0.1s, background 0.1s',
                     outline: 'none',
@@ -160,10 +160,10 @@ export function BgPicker() {
           </div>
 
           {/* Divider */}
-          <div style={{ height: 1, background: '#F4F4F5', marginBottom: 12 }} />
+          <div style={{ height: 1, background: 'var(--divider)', marginBottom: 12 }} />
 
           {/* Color label */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
             Canvas color
           </div>
 
@@ -172,7 +172,7 @@ export function BgPicker() {
             const swatches = PALETTE.filter((s) => s.group === group);
             return (
               <div key={group} style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 10, color: '#A1A1AA', fontWeight: 500, marginBottom: 5, letterSpacing: '0.04em' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 5, letterSpacing: '0.04em' }}>
                   {group}
                 </div>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -187,8 +187,8 @@ export function BgPicker() {
                           width: 28, height: 28, borderRadius: 6,
                           background: swatch.value,
                           border: active
-                            ? '2.5px solid #6366F1'
-                            : (isLight(swatch.value) ? '1.5px solid #E4E4E7' : '1.5px solid transparent'),
+                            ? '2.5px solid var(--active-fg)'
+                            : (isLight(swatch.value) ? '1.5px solid var(--panel-border)' : '1.5px solid transparent'),
                           cursor: 'pointer', padding: 0, position: 'relative',
                           boxShadow: active ? '0 0 0 2px rgba(99,102,241,0.2)' : '0 1px 3px rgba(0,0,0,0.08)',
                           transition: 'transform 0.1s', flexShrink: 0, outline: 'none',
@@ -212,8 +212,8 @@ export function BgPicker() {
           })}
 
           {/* Current color label */}
-          <div style={{ marginTop: 4, fontSize: 12, color: '#A1A1AA', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 14, height: 14, borderRadius: 4, background: canvasBg, border: '1px solid #E4E4E7', flexShrink: 0 }} />
+          <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 14, height: 14, borderRadius: 4, background: canvasBg, border: '1px solid var(--panel-border)', flexShrink: 0 }} />
             {PALETTE.find((s) => s.value === canvasBg)?.label ?? 'Custom'}
             <span style={{ marginLeft: 'auto', fontFamily: 'monospace', fontSize: 11 }}>{canvasBg.toUpperCase()}</span>
           </div>

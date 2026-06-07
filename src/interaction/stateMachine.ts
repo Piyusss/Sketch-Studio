@@ -6,6 +6,7 @@ import type {
   DiamondObject,
   EllipseObject,
   InteractionMode,
+  FrameObject,
   PenObject,
   PenPoint,
   RectObject,
@@ -60,6 +61,8 @@ export class InteractionStateMachine {
   // Move
   private moveStartPositions = new Map<string, { x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number }>();
   private moveLastWorld: Vec2 = { x: 0, y: 0 };
+  // Objects captured inside a frame being moved — they travel with the frame.
+  private frameChildStart = new Map<string, { x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number }>();
 
   // Resize
   private resizeHandle: ResizeHandle | null = null;
@@ -207,7 +210,7 @@ export class InteractionStateMachine {
         if (!e.shiftKey) store.clearSelection();
         this.startSelecting(sp);
       }
-    } else if (store.activeTool === 'rect' || store.activeTool === 'ellipse' || store.activeTool === 'diamond') {
+    } else if (store.activeTool === 'rect' || store.activeTool === 'ellipse' || store.activeTool === 'diamond' || store.activeTool === 'frame') {
       this.startDraw(sp, store.activeTool);
     } else if (store.activeTool === 'text') {
       this.placeText(sp);
@@ -350,6 +353,34 @@ export class InteractionStateMachine {
         this.moveStartPositions.set(obj.id, { x: obj.x, y: obj.y });
       }
     });
+    this.captureFrameChildren(objects);
+  }
+
+  /**
+   * When a frame is dragged, every top-level object whose centre lies inside it
+   * (and isn't itself selected) is captured so it travels with the frame —
+   * giving the "section" container behaviour.
+   */
+  private captureFrameChildren(moving: CanvasObject[]): void {
+    this.frameChildStart.clear();
+    const frames = moving.filter((o) => o.type === 'frame') as FrameObject[];
+    if (frames.length === 0) return;
+    const store = useCanvasStore.getState();
+    const selSet = new Set(store.selectedIds);
+    for (const other of Object.values(store.objects)) {
+      if (other.parentId || other.type === 'frame' || other.locked) continue;
+      if (selSet.has(other.id)) continue;
+      const cx = other.x + other.width / 2;
+      const cy = other.y + other.height / 2;
+      const inside = frames.some((f) => cx >= f.x && cx <= f.x + f.width && cy >= f.y && cy <= f.y + f.height);
+      if (!inside) continue;
+      if (other.type === 'arrow') {
+        const a = other as ArrowObject;
+        this.frameChildStart.set(other.id, { x: other.x, y: other.y, x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2 });
+      } else {
+        this.frameChildStart.set(other.id, { x: other.x, y: other.y });
+      }
+    }
   }
 
   private updateMove(sp: Vec2): void {
@@ -384,14 +415,34 @@ export class InteractionStateMachine {
         spatialIndex.insert({ ...obj, x: newX, y: newY });
       }
     });
+
+    // Carry captured frame contents along by the same delta
+    if (this.frameChildStart.size > 0) {
+      this.frameChildStart.forEach((_start, id) => {
+        const obj = store.getObject(id);
+        if (!obj) return;
+        if (obj.type === 'arrow') {
+          const a = obj as ArrowObject;
+          const updates = { x: obj.x + dx, y: obj.y + dy, x1: a.x1 + dx, y1: a.y1 + dy, x2: a.x2 + dx, y2: a.y2 + dy };
+          store.updateObject(id, updates as Partial<CanvasObject>);
+          spatialIndex.insert({ ...obj, ...updates });
+        } else {
+          store.updateObject(id, { x: obj.x + dx, y: obj.y + dy });
+          spatialIndex.insert({ ...obj, x: obj.x + dx, y: obj.y + dy });
+        }
+      });
+    }
   }
 
   private endMove(): void {
     const store = useCanvasStore.getState();
-    const moves = store.selectedIds
+    // Combine the selected objects with any captured frame children
+    const movedIds = [...store.selectedIds, ...this.frameChildStart.keys()];
+    const startOf = (id: string) => this.moveStartPositions.get(id) ?? this.frameChildStart.get(id);
+    const moves = movedIds
       .map((id) => {
         const obj = store.getObject(id);
-        const start = this.moveStartPositions.get(id);
+        const start = startOf(id);
         if (!obj || !start) return null;
         const from = start;
         const to: typeof start = { x: obj.x, y: obj.y };
@@ -403,6 +454,7 @@ export class InteractionStateMachine {
       })
       .filter((m): m is NonNullable<typeof m> => m !== null)
       .filter((m) => m.from.x !== m.to.x || m.from.y !== m.to.y);
+    this.frameChildStart.clear();
 
     if (moves.length > 0) {
       historyManager.push({
@@ -589,7 +641,7 @@ export class InteractionStateMachine {
 
   // ── Draw ──────────────────────────────────────────────────────────────────
 
-  private startDraw(sp: Vec2, tool: 'rect' | 'ellipse' | 'diamond'): void {
+  private startDraw(sp: Vec2, tool: 'rect' | 'ellipse' | 'diamond' | 'frame'): void {
     this.mode = 'drawing';
     this.drawStartWorld = screenToWorld(sp, this.camera);
     const store = useCanvasStore.getState();
@@ -607,6 +659,14 @@ export class InteractionStateMachine {
       obj = { ...base, type: 'ellipse', fill: 'none', stroke: '#374151', strokeWidth: 1.5 } as EllipseObject;
     } else if (tool === 'diamond') {
       obj = { ...base, type: 'diamond', fill: 'none', stroke: '#374151', strokeWidth: 1.5 } as DiamondObject;
+    } else if (tool === 'frame') {
+      // Frames sit behind everything so their contents render on top.
+      const minZ = Object.values(store.objects).reduce((m, o) => Math.min(m, o.zIndex), 0);
+      const n = store.objects ? Object.values(store.objects).filter((o) => o.type === 'frame').length : 0;
+      obj = {
+        ...base, type: 'frame', zIndex: minZ - 1,
+        name: `Frame ${n + 1}`, fill: 'none', stroke: '#9CA3AF', strokeWidth: 1.5,
+      } as FrameObject;
     } else {
       obj = { ...base, type: 'rect', fill: 'none', stroke: '#374151', strokeWidth: 1.5, cornerRadius: 0 } as RectObject;
     }

@@ -4,7 +4,8 @@ import { getResizeHandleAtPoint, getResizeCursor, getResizeCursorRotated, getRot
 import { ContextMenu } from './ContextMenu';
 import { useCanvasStore } from '../store/canvasStore';
 import { useWorkspaceStore } from '../store/workspaceStore';
-import { tickCamera, getZoomPercent } from '../engine/camera';
+import { tickCamera } from '../engine/camera';
+import { cameraHandle } from '../engine/cameraControl';
 import { drawGrid, drawObjects, drawSelection, setRenderRequestCallback } from '../engine/renderer';
 import { spatialIndex } from '../engine/spatialIndex';
 import { InteractionStateMachine } from '../interaction/stateMachine';
@@ -26,6 +27,7 @@ const CURSOR_MAP: Record<string, string> = {
   arrow: 'crosshair',
   eraser: 'none',
   laser: 'none',
+  frame: 'crosshair',
 };
 
 // ── Laser rendering helpers ───────────────────────────────────────────────────
@@ -108,7 +110,6 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
   const objRef = useRef<HTMLCanvasElement>(null);
   const selRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const zoomLabelRef = useRef<HTMLDivElement>(null);
   const dropOverlayRef = useRef<HTMLDivElement>(null);
 
   const cameraRef = useRef<Camera>({
@@ -121,6 +122,8 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
   );
   canvasSM.ref = smRef.current;
   smRef.current.readOnly = readOnly;
+  // Share the live camera with sibling UI (ZoomControls, Minimap)
+  cameraHandle.current = cameraRef.current;
 
   const rafRef = useRef<number>(0);
   const needsRenderRef = useRef(false);
@@ -344,11 +347,6 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
             if (laserStrokesRef.current.length > 0 || laserCurrentRef.current) {
               needsRenderRef.current = true;
             }
-          }
-
-          // Zoom label
-          if (zoomLabelRef.current) {
-            zoomLabelRef.current.textContent = `${getZoomPercent(cam)}%`;
           }
         }
       }
@@ -861,23 +859,6 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
         <span style={{ fontSize: 18, fontWeight: 600, color: '#2563EB', fontFamily: 'Inter, system-ui, sans-serif' }}>
           Drop image here
         </span>
-      </div>
-
-      {/* Zoom label */}
-      <div
-        ref={zoomLabelRef}
-        style={{
-          position: 'absolute', bottom: 16, right: 16,
-          background: 'rgba(255,255,255,0.9)',
-          backdropFilter: 'blur(6px)',
-          border: '1px solid #E4E4E7',
-          borderRadius: 6, padding: '3px 8px',
-          fontSize: 12, fontWeight: 500, color: '#52525B',
-          pointerEvents: 'none', userSelect: 'none',
-          fontFamily: 'Inter, system-ui, sans-serif',
-        }}
-      >
-        100%
       </div>
     </div>
   );

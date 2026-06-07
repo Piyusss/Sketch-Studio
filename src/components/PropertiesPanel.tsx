@@ -8,15 +8,15 @@ import { ColorPicker } from './ColorPicker';
 import { FONT_FAMILIES, FONT_CATEGORIES } from '../lib/fonts';
 
 const label: React.CSSProperties = {
-  fontSize: 11, fontWeight: 500, color: '#71717A',
+  fontSize: 11, fontWeight: 500, color: 'var(--text-faint)',
   textTransform: 'uppercase', letterSpacing: '0.04em',
   marginBottom: 4,
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '4px 6px',
-  border: '1px solid #E4E4E7', borderRadius: 5,
-  fontSize: 13, color: '#18181B', background: '#FAFAFA',
+  border: '1px solid var(--panel-border)', borderRadius: 5,
+  fontSize: 13, color: 'var(--text-primary)', background: 'var(--input-bg)',
   outline: 'none', boxSizing: 'border-box',
   fontFamily: 'Inter, system-ui, sans-serif',
 };
@@ -64,7 +64,7 @@ function ColorInput({
           type="color"
           value={value.startsWith('#') ? value : '#374151'}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, padding: 0, border: '1px solid #E4E4E7', borderRadius: 4, cursor: 'pointer' }}
+          style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer' }}
         />
         <input
           type="text"
@@ -86,7 +86,7 @@ function FillInput({
   onChange: (v: string) => void;
 }) {
   const enabled = value !== 'none';
-  const colorVal = enabled ? value : '#6366F1';
+  const colorVal = enabled ? value : 'var(--active-fg)';
 
   function toggle() {
     onChange(enabled ? 'none' : colorVal);
@@ -102,9 +102,9 @@ function FillInput({
           style={{
             fontSize: 10, fontWeight: 600,
             padding: '1px 7px', borderRadius: 4,
-            border: '1px solid #E4E4E7',
-            background: enabled ? '#EEF2FF' : '#F4F4F5',
-            color: enabled ? '#4F46E5' : '#A1A1AA',
+            border: '1px solid var(--panel-border)',
+            background: enabled ? 'var(--active-bg)' : 'var(--hover-bg)',
+            color: enabled ? 'var(--active-fg)' : 'var(--text-muted)',
             cursor: 'pointer', letterSpacing: '0.02em',
           }}
         >
@@ -116,9 +116,9 @@ function FillInput({
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           <input
             type="color"
-            value={value.startsWith('#') ? value : '#6366F1'}
+            value={value.startsWith('#') ? value : 'var(--active-fg)'}
             onChange={(e) => onChange(e.target.value)}
-            style={{ width: 28, height: 28, padding: 0, border: '1px solid #E4E4E7', borderRadius: 4, cursor: 'pointer' }}
+            style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer' }}
           />
           <input
             type="text"
@@ -131,14 +131,14 @@ function FillInput({
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '4px 8px', borderRadius: 5,
-          border: '1px dashed #E4E4E7', background: '#FAFAFA',
+          border: '1px dashed var(--panel-border)', background: 'var(--input-bg)',
         }}>
           {/* No-fill crossed swatch */}
           <svg width="18" height="18" viewBox="0 0 18 18">
-            <rect x="1" y="1" width="16" height="16" rx="3" fill="#F4F4F5" stroke="#D4D4D8" strokeWidth="1"/>
+            <rect x="1" y="1" width="16" height="16" rx="3" fill="var(--hover-bg)" stroke="#D4D4D8" strokeWidth="1"/>
             <line x1="2" y1="2" x2="16" y2="16" stroke="#EF4444" strokeWidth="1.4" strokeLinecap="round"/>
           </svg>
-          <span style={{ fontSize: 12, color: '#A1A1AA' }}>No fill</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>No fill</span>
         </div>
       )}
     </div>
@@ -177,9 +177,9 @@ function StrokeInput({
           style={{
             fontSize: 10, fontWeight: 600,
             padding: '1px 7px', borderRadius: 4,
-            border: '1px solid #E4E4E7',
-            background: enabled ? '#EEF2FF' : '#F4F4F5',
-            color: enabled ? '#4F46E5' : '#A1A1AA',
+            border: '1px solid var(--panel-border)',
+            background: enabled ? 'var(--active-bg)' : 'var(--hover-bg)',
+            color: enabled ? 'var(--active-fg)' : 'var(--text-muted)',
             cursor: 'pointer', letterSpacing: '0.02em',
           }}
         >
@@ -195,7 +195,7 @@ function StrokeInput({
               type="color"
               value={color.startsWith('#') ? color : '#374151'}
               onChange={(e) => onColorChange(e.target.value)}
-              style={{ width: 28, height: 28, padding: 0, border: '1px solid #E4E4E7', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
+              style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
             />
             <input
               type="text"
@@ -206,7 +206,7 @@ function StrokeInput({
           </div>
           {/* Width row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 11, color: '#71717A', whiteSpace: 'nowrap' }}>Width</span>
+            <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Width</span>
             <input
               type="range"
               min={0.5} max={20} step={0.5}
@@ -214,20 +214,20 @@ function StrokeInput({
               onChange={(e) => onWidthChange(parseFloat(e.target.value))}
               style={{ flex: 1 }}
             />
-            <span style={{ fontSize: 12, color: '#52525B', minWidth: 24, textAlign: 'right' }}>{width}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 24, textAlign: 'right' }}>{width}</span>
           </div>
         </div>
       ) : (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '4px 8px', borderRadius: 5,
-          border: '1px dashed #E4E4E7', background: '#FAFAFA',
+          border: '1px dashed var(--panel-border)', background: 'var(--input-bg)',
         }}>
           <svg width="18" height="18" viewBox="0 0 18 18">
-            <rect x="1" y="1" width="16" height="16" rx="3" fill="#F4F4F5" stroke="#D4D4D8" strokeWidth="1"/>
+            <rect x="1" y="1" width="16" height="16" rx="3" fill="var(--hover-bg)" stroke="#D4D4D8" strokeWidth="1"/>
             <line x1="2" y1="2" x2="16" y2="16" stroke="#EF4444" strokeWidth="1.4" strokeLinecap="round"/>
           </svg>
-          <span style={{ fontSize: 12, color: '#A1A1AA' }}>No border</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>No border</span>
         </div>
       )}
     </div>
@@ -237,7 +237,7 @@ function StrokeInput({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: '#A1A1AA', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
         {title}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -283,8 +283,8 @@ export function PropertiesPanel() {
     ? {
         position: 'fixed', bottom: 0, left: 0, right: 0,
         width: '100%', maxHeight: '45vh',
-        background: '#ffffff', border: 'none',
-        borderTop: '1px solid #E4E4E7',
+        background: 'var(--panel-bg)', border: 'none',
+        borderTop: '1px solid var(--panel-border)',
         borderRadius: '16px 16px 0 0',
         padding: '12px 16px env(safe-area-inset-bottom, 0)',
         boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
@@ -293,8 +293,8 @@ export function PropertiesPanel() {
       }
     : {
         position: 'absolute', top: 16, right: 16,
-        width: 220, background: '#ffffff',
-        border: '1px solid #E4E4E7', borderRadius: 10,
+        width: 220, background: 'var(--panel-bg)',
+        border: '1px solid var(--panel-border)', borderRadius: 10,
         padding: '12px 14px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
         zIndex: 100, fontFamily: 'Inter, system-ui, sans-serif',
@@ -375,7 +375,7 @@ export function PropertiesPanel() {
         return (
           <Section title="Text">
             {/* Double-click hint */}
-            <div style={{ fontSize: 11, color: '#A1A1AA', marginBottom: 4 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
               Double-click a text element to edit it on the canvas.
             </div>
 
@@ -439,10 +439,10 @@ export function PropertiesPanel() {
                     onClick={() => upd({ align: a })}
                     style={{
                       flex: 1, padding: '5px 0',
-                      border: `1px solid ${t.align === a ? '#6366F1' : '#E4E4E7'}`,
+                      border: `1px solid ${t.align === a ? 'var(--active-fg)' : 'var(--panel-border)'}`,
                       borderRadius: 5, fontSize: 12, cursor: 'pointer',
-                      background: t.align === a ? '#EEF2FF' : '#FAFAFA',
-                      color: t.align === a ? '#4F46E5' : '#52525B',
+                      background: t.align === a ? 'var(--active-bg)' : 'var(--input-bg)',
+                      color: t.align === a ? 'var(--active-fg)' : 'var(--text-secondary)',
                       fontWeight: t.align === a ? 600 : 400,
                     }}
                   >
@@ -454,14 +454,14 @@ export function PropertiesPanel() {
 
             {/* Line height */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: '#71717A', whiteSpace: 'nowrap' }}>Line height</span>
+              <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Line height</span>
               <input
                 type="range" min={0.8} max={3} step={0.05}
                 value={t.lineHeight ?? 1.25}
                 onChange={(e) => upd({ lineHeight: parseFloat(e.target.value) })}
                 style={{ flex: 1 }}
               />
-              <span style={{ fontSize: 12, color: '#52525B', minWidth: 28, textAlign: 'right' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 28, textAlign: 'right' }}>
                 {(t.lineHeight ?? 1.25).toFixed(2)}
               </span>
             </div>
@@ -500,11 +500,11 @@ export function PropertiesPanel() {
               recentColors={penRecentColors}
             />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: '#71717A', whiteSpace: 'nowrap' }}>Width</span>
+              <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Width</span>
               <input type="range" min={0.5} max={24} step={0.5} value={pen.strokeWidth}
                 onChange={(e) => updatePen({ strokeWidth: parseFloat(e.target.value) })}
                 style={{ flex: 1 }} />
-              <span style={{ fontSize: 12, color: '#52525B', minWidth: 28, textAlign: 'right' }}>{pen.strokeWidth}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 28, textAlign: 'right' }}>{pen.strokeWidth}</span>
             </div>
             <div>
               <div style={label}>Style</div>
@@ -515,10 +515,10 @@ export function PropertiesPanel() {
                     onClick={() => updatePen({ strokeStyle: s.id })}
                     style={{
                       flex: 1, padding: '4px 0', fontSize: 12, cursor: 'pointer',
-                      border: '1px solid ' + (pen.strokeStyle === s.id ? '#3B82F6' : '#E4E4E7'),
+                      border: '1px solid ' + (pen.strokeStyle === s.id ? 'var(--accent)' : 'var(--panel-border)'),
                       borderRadius: 5, letterSpacing: '0.05em',
-                      background: pen.strokeStyle === s.id ? '#EFF6FF' : '#FAFAFA',
-                      color: pen.strokeStyle === s.id ? '#3B82F6' : '#52525B',
+                      background: pen.strokeStyle === s.id ? 'var(--active-bg)' : 'var(--input-bg)',
+                      color: pen.strokeStyle === s.id ? 'var(--accent)' : 'var(--text-secondary)',
                       fontWeight: pen.strokeStyle === s.id ? 600 : 400,
                     }}
                   >{s.label}</button>
@@ -547,9 +547,9 @@ export function PropertiesPanel() {
         const HeadBtn = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
           <button onClick={onClick} style={{
             flex: 1, padding: '4px 0', fontSize: 11, cursor: 'pointer',
-            border: '1px solid #E4E4E7', borderRadius: 5,
-            background: active ? '#18181B' : '#FAFAFA',
-            color: active ? '#fff' : '#52525B', fontWeight: active ? 600 : 400,
+            border: '1px solid ' + (active ? 'var(--active-fg)' : 'var(--panel-border)'), borderRadius: 5,
+            background: active ? 'var(--active-bg)' : 'var(--input-bg)',
+            color: active ? 'var(--active-fg)' : 'var(--text-secondary)', fontWeight: active ? 600 : 400,
           }}>{label}</button>
         );
 
@@ -557,11 +557,11 @@ export function PropertiesPanel() {
           <Section title="Arrow">
             <ColorInput label="Color" value={arr.stroke} onChange={(v) => updateArrow({ stroke: v })} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: '#71717A', whiteSpace: 'nowrap' }}>Width</span>
+              <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Width</span>
               <input type="range" min={0.5} max={20} step={0.5} value={arr.strokeWidth}
                 onChange={(e) => updateArrow({ strokeWidth: parseFloat(e.target.value) })}
                 style={{ flex: 1 }} />
-              <span style={{ fontSize: 12, color: '#52525B', minWidth: 24, textAlign: 'right' }}>{arr.strokeWidth}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 24, textAlign: 'right' }}>{arr.strokeWidth}</span>
             </div>
             <div>
               <div style={label}>Curve</div>
@@ -573,7 +573,7 @@ export function PropertiesPanel() {
             </div>
             {arr.curved && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 11, color: '#71717A', whiteSpace: 'nowrap' }}>Bend</span>
+                <span style={{ fontSize: 11, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>Bend</span>
                 <input type="range" min={-200} max={200} step={5} value={arr.bendOffset}
                   onChange={(e) => updateArrow({ bendOffset: parseFloat(e.target.value) })}
                   style={{ flex: 1 }} />
@@ -599,6 +599,35 @@ export function PropertiesPanel() {
         );
       })()}
 
+      {/* Frame */}
+      {allSameType && first.type === 'frame' && (() => {
+        const frame = first as import('../types').FrameObject;
+        return (
+          <Section title="Frame">
+            <div>
+              <div style={label}>Name</div>
+              <input
+                type="text"
+                style={inputStyle}
+                value={frame.name}
+                onChange={(e) => update({ name: e.target.value } as Partial<CanvasObject>)}
+                placeholder="Frame name"
+              />
+            </div>
+            <FillInput
+              value={frame.fill}
+              onChange={(v) => update({ fill: v } as Partial<CanvasObject>)}
+            />
+            <StrokeInput
+              color={frame.stroke}
+              width={frame.strokeWidth}
+              onColorChange={(v) => update({ stroke: v } as Partial<CanvasObject>)}
+              onWidthChange={(v) => update({ strokeWidth: Math.max(0, v) } as Partial<CanvasObject>)}
+            />
+          </Section>
+        );
+      })()}
+
       {/* Opacity */}
       <Section title="Opacity">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -608,7 +637,7 @@ export function PropertiesPanel() {
             onChange={(e) => update({ opacity: parseFloat(e.target.value) })}
             style={{ flex: 1 }}
           />
-          <span style={{ fontSize: 12, color: '#52525B', minWidth: 30 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 30 }}>
             {Math.round(avg('opacity') * 100)}%
           </span>
         </div>

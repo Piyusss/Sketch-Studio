@@ -9,6 +9,7 @@ import type {
   ImageObject,
   PenObject,
   ArrowObject,
+  FrameObject,
   Vec2,
   SnapGuide,
   StrokeStyle,
@@ -206,8 +207,48 @@ function drawObject(
     case 'group':
       drawGroup(ctx, obj as GroupObject, camera, allObjects);
       break;
+    case 'frame':
+      drawFrame(ctx, obj as FrameObject, sx, sy, sw, sh, camera.zoom);
+      break;
   }
 
+  ctx.restore();
+}
+
+const FRAME_STROKE = '#9CA3AF';
+
+function drawFrame(
+  ctx: CanvasRenderingContext2D,
+  obj: FrameObject,
+  sx: number, sy: number, sw: number, sh: number,
+  zoom: number,
+): void {
+  // Subtle background fill
+  if (obj.fill && obj.fill !== 'none') {
+    ctx.fillStyle = obj.fill;
+    ctx.beginPath();
+    ctx.rect(sx, sy, sw, sh);
+    ctx.fill();
+  }
+  // Border
+  ctx.strokeStyle = obj.stroke && obj.stroke !== 'none' ? obj.stroke : FRAME_STROKE;
+  ctx.lineWidth = (obj.strokeWidth || 1) * zoom;
+  ctx.setLineDash([]);
+  ctx.strokeRect(sx, sy, sw, sh);
+
+  // Title label above the top-left corner
+  const fontSize = Math.max(11, 13 * zoom);
+  ctx.font = `600 ${fontSize}px Inter, system-ui, sans-serif`;
+  ctx.fillStyle = obj.stroke && obj.stroke !== 'none' ? obj.stroke : '#6B7280';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  const label = obj.name || 'Frame';
+  // Clip the label to the frame width so long names don't overflow wildly
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(sx, sy - fontSize - 8 * zoom, Math.max(sw, 60), fontSize + 8 * zoom);
+  ctx.clip();
+  ctx.fillText(label, sx + 1, sy - 4 * zoom);
   ctx.restore();
 }
 

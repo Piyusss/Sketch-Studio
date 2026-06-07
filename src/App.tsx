@@ -6,6 +6,10 @@ import { Canvas } from './components/Canvas';
 import { Toolbar } from './components/Toolbar';
 import { PropertiesPanel } from './components/PropertiesPanel';
 import { BgPicker } from './components/BgPicker';
+import { ThemeToggle } from './components/ThemeToggle';
+import { ZoomControls } from './components/ZoomControls';
+import { Minimap } from './components/Minimap';
+import { CommandPalette } from './components/CommandPalette';
 import { LandingPage } from './components/LandingPage';
 import { WorkspacesPage } from './components/WorkspacesPage';
 import { FilesPage } from './components/FilesPage';
@@ -134,14 +138,14 @@ function BackButton({ onClick }: { onClick: () => void }) {
         position: 'absolute', top: 14, left: 14, zIndex: 200,
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '6px 12px', borderRadius: 8,
-        background: 'rgba(255,255,255,0.88)',
+        background: 'var(--panel-translucent)',
         backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(0,0,0,0.08)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer',
+        border: '1px solid var(--panel-border)',
+        boxShadow: 'var(--panel-shadow)',
+        fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer',
       }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.98)'; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.88)'; }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--panel-bg)'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--panel-translucent)'; }}
     >
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
         <path d="M10 4L6 8L10 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -252,6 +256,10 @@ function EditorRoute() {
       <Toolbar />
       <PropertiesPanel />
       <BgPicker />
+      <ThemeToggle />
+      <Minimap />
+      <ZoomControls />
+      <CommandPalette />
     </div>
   );
 }

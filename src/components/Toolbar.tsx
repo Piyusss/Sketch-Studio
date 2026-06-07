@@ -35,6 +35,7 @@ import {
   TbDiamond,            // Diamond
   TbMinus,              // Line   — straight horizontal line
   TbArrowUpRight,       // Arrow  — directional connector
+  TbFrame,              // Frame  — section container
   // Other drawing tools
   TbTypography,         // Text   — "Aa" typographic label
   TbPhoto,              // Image  — picture frame with mountain
@@ -67,6 +68,7 @@ const SHAPE_TOOLS: ToolDef[] = [
   { id: 'diamond', label: 'Diamond',   shortcut: 'D', icon: <TbDiamond     size={ICO} /> },
   { id: 'line',    label: 'Line',      shortcut: '',  icon: <TbMinus       size={ICO} /> },
   { id: 'arrow',   label: 'Arrow',     shortcut: 'A', icon: <TbArrowUpRight size={ICO} /> },
+  { id: 'frame',   label: 'Frame',     shortcut: 'F', icon: <TbFrame       size={ICO} /> },
 ];
 const SHAPE_IDS = new Set<Tool>(SHAPE_TOOLS.map((s) => s.id));
 
@@ -114,17 +116,17 @@ function PenPanel() {
       transition={{ duration: 0.15, ease: 'easeOut' }}
       style={{
         position: 'absolute', top: 52, left: '50%', transform: 'translateX(-50%)',
-        background: '#fff', border: '1px solid #E4E4E7',
+        background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
         borderRadius: 12, padding: '14px 16px',
         boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
         zIndex: 101, width: 232,
         fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: 11, color: '#52525B',
+        fontSize: 11, color: 'var(--text-secondary)',
       }}
     >
       {/* Color picker */}
       <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#A1A1AA', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
           Color
         </div>
         <ColorPicker
@@ -135,13 +137,13 @@ function PenPanel() {
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: '#F4F4F5', margin: '10px 0' }} />
+      <div style={{ height: 1, background: 'var(--hover-bg)', margin: '10px 0' }} />
 
       {/* Width */}
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#A1A1AA', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Width</span>
-          <span style={{ fontWeight: 600, color: '#18181B', fontSize: 11 }}>{penWidth}px</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Width</span>
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 11 }}>{penWidth}px</span>
         </div>
         <input
           type="range" min={1} max={24} step={0.5} value={penWidth}
@@ -152,7 +154,7 @@ function PenPanel() {
 
       {/* Style */}
       <div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#A1A1AA', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
           Style
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
@@ -163,9 +165,9 @@ function PenPanel() {
               onClick={() => setPenStyle(s.id)}
               style={{
                 flex: 1, padding: '5px 4px', borderRadius: 6, cursor: 'pointer',
-                border: '1px solid ' + (penStyle === s.id ? '#3B82F6' : '#E4E4E7'),
-                background: penStyle === s.id ? '#EFF6FF' : '#FAFAFA',
-                color: penStyle === s.id ? '#3B82F6' : '#52525B',
+                border: '1px solid ' + (penStyle === s.id ? 'var(--accent)' : 'var(--panel-border)'),
+                background: penStyle === s.id ? 'var(--active-bg)' : 'var(--panel-bg-2)',
+                color: penStyle === s.id ? 'var(--accent)' : 'var(--text-secondary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -192,12 +194,12 @@ function LaserPanel() {
       transition={{ duration: 0.15, ease: 'easeOut' }}
       style={{
         position: 'absolute', top: 52, left: '50%', transform: 'translateX(-50%)',
-        background: '#fff', border: '1px solid #E4E4E7',
+        background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
         borderRadius: 10, padding: '10px 14px',
         boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
         zIndex: 101, display: 'flex', alignItems: 'center', gap: 16,
         fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: 11, color: '#52525B', whiteSpace: 'nowrap',
+        fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -205,15 +207,15 @@ function LaserPanel() {
         <input type="range" min={2} max={16} step={1} value={laserSize}
           onChange={(e) => setLaserSize(Number(e.target.value))}
           style={{ width: 72 }} />
-        <span style={{ minWidth: 14, textAlign: 'right', fontWeight: 600, color: '#18181B' }}>{laserSize}</span>
+        <span style={{ minWidth: 14, textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)' }}>{laserSize}</span>
       </div>
-      <div style={{ width: 1, height: 18, background: '#E4E4E7' }} />
+      <div style={{ width: 1, height: 18, background: 'var(--panel-border)' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>Glow</span>
         <input type="range" min={5} max={40} step={1} value={laserGlow}
           onChange={(e) => setLaserGlow(Number(e.target.value))}
           style={{ width: 72 }} />
-        <span style={{ minWidth: 14, textAlign: 'right', fontWeight: 600, color: '#18181B' }}>{laserGlow}</span>
+        <span style={{ minWidth: 14, textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)' }}>{laserGlow}</span>
       </div>
     </motion.div>
   );
@@ -223,20 +225,20 @@ const btnBase: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   width: 34, height: 34, border: 'none', borderRadius: 7,
   cursor: 'pointer', transition: 'background 0.1s',
-  color: '#52525B', background: 'transparent',
+  color: 'var(--text-secondary)', background: 'transparent',
 };
-const btnActive: React.CSSProperties = { ...btnBase, background: '#EEF2FF', color: '#4F46E5' };
+const btnActive: React.CSSProperties = { ...btnBase, background: 'var(--active-bg)', color: 'var(--active-fg)' };
 
 function IconBtn({ title, onClick, children }: { title: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button style={btnBase} onClick={onClick} title={title}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
     >{children}</button>
   );
 }
 
-const Divider = () => <div style={{ width: 1, height: 22, background: '#E4E4E7', margin: '0 3px' }} />;
+const Divider = () => <div style={{ width: 1, height: 22, background: 'var(--panel-border)', margin: '0 3px' }} />;
 
 export function Toolbar() {
   const { canUndo, canRedo } = useHistoryState();
@@ -336,7 +338,7 @@ export function Toolbar() {
     </AnimatePresence>
     <div className="toolbar-scroll" style={{
       display: 'flex', alignItems: 'center', gap: 2,
-      background: '#ffffff', border: '1px solid #E4E4E7',
+      background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
       borderRadius: 10, padding: '4px 6px',
       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       userSelect: 'none',
@@ -352,7 +354,7 @@ export function Toolbar() {
           opacity: canUndo ? 1 : 0.35,
           cursor: canUndo ? 'pointer' : 'not-allowed',
         }}
-        onMouseEnter={(e) => { if (canUndo) (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+        onMouseEnter={(e) => { if (canUndo) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
       >
         <TbArrowBackUp size={ICO} />
@@ -366,7 +368,7 @@ export function Toolbar() {
           opacity: canRedo ? 1 : 0.35,
           cursor: canRedo ? 'pointer' : 'not-allowed',
         }}
-        onMouseEnter={(e) => { if (canRedo) (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+        onMouseEnter={(e) => { if (canRedo) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
       >
         <TbArrowForwardUp size={ICO} />
@@ -381,7 +383,7 @@ export function Toolbar() {
           <button key={tool.id} style={active ? btnActive : btnBase}
             onClick={() => setActiveTool(tool.id)}
             title={`${tool.label} (${tool.shortcut})`}
-            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
           >{tool.icon}</button>
         );
@@ -422,7 +424,7 @@ export function Toolbar() {
               style={{
                 position: 'absolute', top: 'calc(100% + 6px)', left: '50%',
                 transform: 'translateX(-50%)',
-                background: '#fff', border: '1px solid #E4E4E7',
+                background: 'var(--panel-bg)', border: '1px solid var(--panel-border)',
                 borderRadius: 10, padding: 4,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
                 zIndex: 200, minWidth: 168,
@@ -439,18 +441,18 @@ export function Toolbar() {
                       display: 'flex', alignItems: 'center', gap: 9,
                       width: '100%', padding: '7px 10px',
                       border: 'none', borderRadius: 7, cursor: 'pointer',
-                      background: isActive ? '#EEF2FF' : 'transparent',
-                      color: isActive ? '#4F46E5' : '#374151',
+                      background: isActive ? 'var(--active-bg)' : 'transparent',
+                      color: isActive ? 'var(--active-fg)' : 'var(--text-secondary)',
                       fontSize: 13, textAlign: 'left',
                       fontFamily: 'inherit',
                     }}
-                    onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+                    onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
                     onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                   >
-                    <span style={{ display: 'flex', color: isActive ? '#4F46E5' : '#52525B' }}>{s.icon}</span>
+                    <span style={{ display: 'flex', color: isActive ? 'var(--active-fg)' : 'var(--text-secondary)' }}>{s.icon}</span>
                     <span style={{ flex: 1, fontWeight: isActive ? 600 : 400 }}>{s.label}</span>
                     {s.shortcut && (
-                      <span style={{ fontSize: 11, color: '#A1A1AA', fontWeight: 600 }}>{s.shortcut}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{s.shortcut}</span>
                     )}
                   </button>
                 );
@@ -472,7 +474,7 @@ export function Toolbar() {
           <button key={tool.id} style={active ? btnActive : btnBase}
             onClick={handleClick}
             title={tool.shortcut ? `${tool.label} (${tool.shortcut})` : tool.label}
-            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = '#F4F4F5'; }}
+            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
           >{tool.icon}</button>
         );
@@ -525,10 +527,10 @@ export function Toolbar() {
             style={{
               ...btnBase,
               background: isLocked ? '#FEF3C7' : 'transparent',
-              color: isLocked ? '#F59E0B' : '#52525B',
+              color: isLocked ? '#F59E0B' : 'var(--text-secondary)',
               border: isLocked ? '1px solid #FDE68A' : '1px solid transparent',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = isLocked ? '#FDE68A' : '#F4F4F5'; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = isLocked ? '#FDE68A' : 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = isLocked ? '#FEF3C7' : 'transparent'; }}
           >
             {isLocked

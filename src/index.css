@@ -1,3 +1,58 @@
+/* ── Theme design tokens ─────────────────────────────────────────────────────
+   Inline styles reference these via var(--token). Flipping <html data-theme>
+   re-themes the whole UI chrome instantly with no React re-render. The canvas
+   background itself is controlled separately by the BgPicker. */
+:root,
+:root[data-theme='light'] {
+  --panel-bg: #ffffff;
+  --panel-bg-2: #fafafa;
+  --panel-translucent: rgba(255, 255, 255, 0.88);
+  --panel-border: #e4e4e7;
+  --panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --panel-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --text-faint: #71717a;
+
+  --hover-bg: #f4f4f5;
+  --active-bg: #eef2ff;
+  --active-fg: #4f46e5;
+  --divider: #e4e4e7;
+
+  --input-bg: #ffffff;
+  --input-border: #e4e4e7;
+
+  --accent: #3b82f6;
+  --scrollbar-thumb: #d4d4d8;
+}
+
+:root[data-theme='dark'] {
+  --panel-bg: #1e1e24;
+  --panel-bg-2: #26262e;
+  --panel-translucent: rgba(30, 30, 36, 0.88);
+  --panel-border: #34343c;
+  --panel-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --panel-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.55);
+
+  --text-primary: #f4f4f5;
+  --text-secondary: #c4c4cc;
+  --text-muted: #8b8b94;
+  --text-faint: #71717a;
+
+  --hover-bg: rgba(255, 255, 255, 0.07);
+  --active-bg: rgba(99, 102, 241, 0.22);
+  --active-fg: #a5b4fc;
+  --divider: #34343c;
+
+  --input-bg: #2a2a32;
+  --input-border: #3c3c46;
+
+  --accent: #60a5fa;
+  --scrollbar-thumb: #45454f;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -33,7 +88,7 @@ canvas {
 /* Thin scrollbars for panels */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 
 /* ── Responsive utilities ────────────────────────────────────────────────── */
 
