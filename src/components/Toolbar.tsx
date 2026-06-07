@@ -61,7 +61,20 @@ import {
 
 const ICO = 16; // uniform icon size (px) across the whole toolbar
 
-interface ToolDef { id: Tool; label: string; shortcut: string; icon: React.ReactNode; }
+interface ToolDef { id: Tool; label: string; shortcut: string; icon: React.ReactNode; num?: number; }
+
+// Small subscript badge showing a tool's number-row shortcut, drawn in the
+// corner of its button (see `num` on ToolDef / MAIN_TOOLS / SHAPE_GROUP_NUM).
+function NumBadge({ n, active }: { n: number; active: boolean }) {
+  return (
+    <span style={{
+      position: 'absolute', bottom: 1, right: 3,
+      fontSize: 8, lineHeight: 1, fontWeight: 700,
+      color: active ? 'var(--active-fg)' : 'var(--text-muted)',
+      opacity: 0.7, pointerEvents: 'none',
+    }}>{n}</span>
+  );
+}
 
 // Shape tools live in the dropdown, not the main bar
 const SHAPE_TOOLS: ToolDef[] = [
@@ -74,16 +87,22 @@ const SHAPE_TOOLS: ToolDef[] = [
 ];
 const SHAPE_IDS = new Set<Tool>(SHAPE_TOOLS.map((s) => s.id));
 
-// Non-shape tools that stay in the main bar
+// Non-shape tools that stay in the main bar. `num` mirrors the number-row
+// shortcut registered in `interaction/shortcuts.ts` and is shown as a small
+// subscript badge under each icon.
 const MAIN_TOOLS: ToolDef[] = [
-  { id: 'select', label: 'Select', shortcut: 'V', icon: <TbPointer   size={ICO} /> },
-  { id: 'pan',    label: 'Pan',    shortcut: 'H', icon: <TbHandStop  size={ICO} /> },
-  { id: 'text',   label: 'Text',   shortcut: 'T', icon: <TbTypography size={ICO} /> },
-  { id: 'image',  label: 'Image',  shortcut: 'I', icon: <TbPhoto     size={ICO} /> },
-  { id: 'pen',    label: 'Pen',    shortcut: 'P', icon: <TbPencil    size={ICO} /> },
-  { id: 'eraser', label: 'Eraser', shortcut: 'E', icon: <TbEraser    size={ICO} /> },
-  { id: 'laser',  label: 'Laser',  shortcut: 'L', icon: <TbHighlight size={ICO} style={{ color: '#EF4444' }} /> },
+  { id: 'select', label: 'Select', shortcut: 'V', num: 1, icon: <TbPointer   size={ICO} /> },
+  { id: 'pan',    label: 'Pan',    shortcut: 'H', num: 2, icon: <TbHandStop  size={ICO} /> },
+  { id: 'text',   label: 'Text',   shortcut: 'T', num: 4, icon: <TbTypography size={ICO} /> },
+  { id: 'image',  label: 'Image',  shortcut: 'I', num: 5, icon: <TbPhoto     size={ICO} /> },
+  { id: 'pen',    label: 'Pen',    shortcut: 'P', num: 6, icon: <TbPencil    size={ICO} /> },
+  { id: 'eraser', label: 'Eraser', shortcut: 'E', num: 7, icon: <TbEraser    size={ICO} /> },
+  { id: 'laser',  label: 'Laser',  shortcut: 'L', num: 8, icon: <TbHighlight size={ICO} style={{ color: '#EF4444' }} /> },
 ];
+
+// The shapes-dropdown button (rect/ellipse/diamond/line/arrow/frame) shares
+// a single number-row shortcut that activates whichever shape was last used.
+const SHAPE_GROUP_NUM = 3;
 
 function PenPanel() {
   const penColor = useCanvasStore((s) => s.penColor);
@@ -224,6 +243,7 @@ function LaserPanel() {
 }
 
 const btnBase: React.CSSProperties = {
+  position: 'relative',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   width: 34, height: 34, border: 'none', borderRadius: 7,
   cursor: 'pointer', transition: 'background 0.1s',
@@ -401,10 +421,13 @@ export function Toolbar() {
         return (
           <button key={tool.id} style={active ? btnActive : btnBase}
             onClick={() => setActiveTool(tool.id)}
-            title={`${tool.label} (${tool.shortcut})`}
+            title={`${tool.label} (${tool.shortcut}${tool.num ? ` · ${tool.num}` : ''})`}
             onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-          >{tool.icon}</button>
+          >
+            {tool.icon}
+            {tool.num !== undefined && <NumBadge n={tool.num} active={active} />}
+          </button>
         );
       })}
 
@@ -422,10 +445,11 @@ export function Toolbar() {
           if (activeTool === lastShape) { shapeOpen ? setShapeOpen(false) : openShapeMenu(); }
           else { setActiveTool(lastShape); setShapeOpen(false); }
         }}
-        title={`${currentShapeDef.label}${currentShapeDef.shortcut ? ` (${currentShapeDef.shortcut})` : ''} — click the arrow for more shapes`}
+        title={`${currentShapeDef.label}${currentShapeDef.shortcut ? ` (${currentShapeDef.shortcut})` : ''} · ${SHAPE_GROUP_NUM} — click the arrow for more shapes`}
       >
         {currentShapeDef.icon}
         <TbChevronDown size={12} style={{ opacity: 0.6 }} />
+        <NumBadge n={SHAPE_GROUP_NUM} active={isShapeActive} />
       </button>
 
       {/* Dropdown — portaled to <body> so the toolbar's horizontal-scroll
@@ -490,13 +514,17 @@ export function Toolbar() {
         const handleClick = tool.id === 'image'
           ? handleImageButtonClick
           : () => setActiveTool(tool.id);
+        const shortcutHint = [tool.shortcut, tool.num != null ? String(tool.num) : null].filter(Boolean).join(' · ');
         return (
           <button key={tool.id} style={active ? btnActive : btnBase}
             onClick={handleClick}
-            title={tool.shortcut ? `${tool.label} (${tool.shortcut})` : tool.label}
+            title={shortcutHint ? `${tool.label} (${shortcutHint})` : tool.label}
             onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)'; }}
             onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-          >{tool.icon}</button>
+          >
+            {tool.icon}
+            {tool.num !== undefined && <NumBadge n={tool.num} active={active} />}
+          </button>
         );
       })}
 

@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import type { Camera } from '../types';
+import type { Camera, Tool } from '../types';
 import { useCanvasStore } from '../store/canvasStore';
 import { historyManager } from '../history/historyManager';
 import { RemoveObjectsCommand } from '../history/commands';
@@ -45,6 +45,20 @@ const registry: Record<string, Handler> = {
   'e': () => useCanvasStore.getState().setActiveTool('eraser'),
   'l': () => useCanvasStore.getState().setActiveTool('laser'),
   'f': () => useCanvasStore.getState().setActiveTool('frame'),
+
+  // Number-row shortcuts mirroring the toolbar's left-to-right order — the
+  // little subscript digits under each icon show these at a glance.
+  '1': () => useCanvasStore.getState().setActiveTool('select'),
+  '2': () => useCanvasStore.getState().setActiveTool('pan'),
+  '3': () => {
+    const lastShape = (localStorage.getItem('sketch-last-shape') as Tool) ?? 'rect';
+    useCanvasStore.getState().setActiveTool(lastShape);
+  },
+  '4': () => useCanvasStore.getState().setActiveTool('text'),
+  '5': () => useCanvasStore.getState().setActiveTool('image'),
+  '6': () => useCanvasStore.getState().setActiveTool('pen'),
+  '7': () => useCanvasStore.getState().setActiveTool('eraser'),
+  '8': () => useCanvasStore.getState().setActiveTool('laser'),
 
   'ctrl+=': (cam) => { cam.targetZoom = clamp(cam.targetZoom * 1.25, MIN_ZOOM, MAX_ZOOM); },
   'ctrl+-': (cam) => { cam.targetZoom = clamp(cam.targetZoom * 0.8, MIN_ZOOM, MAX_ZOOM); },

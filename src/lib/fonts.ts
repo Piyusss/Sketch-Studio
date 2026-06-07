@@ -8,6 +8,7 @@ export const FONT_FAMILIES: FontDef[] = [
   // Handwritten / Whiteboard
   { label: 'Caveat',        value: 'Caveat, cursive',                       category: 'Handwritten' },
   { label: 'Patrick Hand',  value: '"Patrick Hand", cursive',               category: 'Handwritten' },
+  { label: 'Comic Sans',    value: '"Comic Sans MS", "Comic Sans", cursive', category: 'Handwritten' },
   // Professional / Document
   { label: 'Inter',         value: 'Inter, system-ui, sans-serif',          category: 'Professional' },
   { label: 'Roboto',        value: 'Roboto, sans-serif',                    category: 'Professional' },
