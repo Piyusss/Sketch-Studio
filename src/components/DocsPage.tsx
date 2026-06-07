@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { ThemeToggle } from './ThemeToggle';
 
 // ── Navigation structure ─────────────────────────────────────────────────────
 // Grouped sidebar sections. Each leaf maps 1:1 to a content section rendered
@@ -67,7 +68,7 @@ const FLAT_ITEMS: { id: SectionId; label: string }[] = NAV_GROUPS.flatMap((g) =>
 
 function Prose({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontSize: 14.5, color: '#52525B', lineHeight: 1.75, margin: '12px 0 0', maxWidth: 680 }}>
+    <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', lineHeight: 1.75, margin: '12px 0 0', maxWidth: 680 }}>
       {children}
     </p>
   );
@@ -75,7 +76,7 @@ function Prose({ children }: { children: React.ReactNode }) {
 
 function SubHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#18181B', letterSpacing: '-0.01em', margin: '30px 0 0' }}>
+    <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em', margin: '30px 0 0' }}>
       {children}
     </h3>
   );
@@ -85,7 +86,7 @@ function InlineCode({ children }: { children: React.ReactNode }) {
   return (
     <code style={{
       fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: '0.86em',
-      background: '#F4F4F5', border: '1px solid #ECECEE', padding: '1px 5px', borderRadius: 4, color: '#3F3F46',
+      background: 'var(--hover-bg)', border: '1px solid var(--panel-border)', padding: '1px 5px', borderRadius: 4, color: 'var(--text-secondary)',
     }}>{children}</code>
   );
 }
@@ -96,10 +97,10 @@ function BulletList({ items }: { items: BulletItem[] }) {
   return (
     <ul style={{ margin: '14px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 9, maxWidth: 680 }}>
       {items.map((it, i) => (
-        <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, fontSize: 14, color: '#52525B', lineHeight: 1.65 }}>
-          <span style={{ flexShrink: 0, marginTop: 9, width: 4, height: 4, borderRadius: '50%', background: '#A1A1AA' }} />
+        <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+          <span style={{ flexShrink: 0, marginTop: 9, width: 4, height: 4, borderRadius: '50%', background: 'var(--text-muted)' }} />
           <span>
-            {it.lead && <strong style={{ color: '#09090B', fontWeight: 600 }}>{it.lead}{typeof it.text === 'string' && it.text ? ' — ' : ''}</strong>}
+            {it.lead && <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{it.lead}{typeof it.text === 'string' && it.text ? ' — ' : ''}</strong>}
             {it.text}
           </span>
         </li>
@@ -110,15 +111,15 @@ function BulletList({ items }: { items: BulletItem[] }) {
 
 function Callout({ children, tone = 'note' }: { children: React.ReactNode; tone?: 'note' | 'tip' }) {
   const c = tone === 'tip'
-    ? { bar: '#22C55E', bg: '#F0FDF4', label: 'Why it matters' }
-    : { bar: '#3B82F6', bg: '#EFF6FF', label: 'Note' };
+    ? { bar: '#22C55E', bg: 'rgba(34,197,94,0.08)', label: 'Why it matters' }
+    : { bar: '#3B82F6', bg: 'rgba(59,130,246,0.08)', label: 'Note' };
   return (
     <div style={{
       margin: '18px 0 0', maxWidth: 680, background: c.bg, borderLeft: `3px solid ${c.bar}`,
       borderRadius: '0 8px 8px 0', padding: '12px 16px',
     }}>
       <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: c.bar, marginBottom: 4 }}>{c.label}</div>
-      <div style={{ fontSize: 13.5, color: '#3F3F46', lineHeight: 1.65 }}>{children}</div>
+      <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.65 }}>{children}</div>
     </div>
   );
 }
@@ -127,26 +128,26 @@ function Callout({ children, tone = 'note' }: { children: React.ReactNode; tone?
 
 function DataTable({ columns, rows, mono }: { columns: string[]; rows: React.ReactNode[][]; mono?: boolean }) {
   return (
-    <div style={{ margin: '18px 0 0', maxWidth: 680, border: '1px solid #E4E4E7', borderRadius: 10, overflow: 'hidden' }}>
+    <div style={{ margin: '18px 0 0', maxWidth: 680, border: '1px solid var(--panel-border)', borderRadius: 10, overflow: 'hidden' }}>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
           <thead>
-            <tr style={{ background: '#FAFAFA' }}>
+            <tr style={{ background: 'var(--panel-bg-2)' }}>
               {columns.map((c, i) => (
                 <th key={i} style={{
-                  textAlign: 'left', padding: '9px 14px', fontWeight: 700, color: '#52525B',
+                  textAlign: 'left', padding: '9px 14px', fontWeight: 700, color: 'var(--text-secondary)',
                   fontSize: 11.5, letterSpacing: '0.03em', textTransform: 'uppercase',
-                  borderBottom: '1px solid #E4E4E7', whiteSpace: 'nowrap',
+                  borderBottom: '1px solid var(--panel-border)', whiteSpace: 'nowrap',
                 }}>{c}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((row, ri) => (
-              <tr key={ri} style={{ borderTop: ri > 0 ? '1px solid #F4F4F5' : undefined }}>
+              <tr key={ri} style={{ borderTop: ri > 0 ? '1px solid var(--divider)' : undefined }}>
                 {row.map((cell, ci) => (
                   <td key={ci} style={{
-                    padding: '9px 14px', color: ci === 0 ? '#18181B' : '#52525B', verticalAlign: 'top',
+                    padding: '9px 14px', color: ci === 0 ? 'var(--text-primary)' : 'var(--text-secondary)', verticalAlign: 'top',
                     lineHeight: 1.55,
                     fontFamily: mono && ci === 0 ? 'ui-monospace, SFMono-Regular, monospace' : undefined,
                     fontWeight: ci === 0 ? 600 : 400,
@@ -444,7 +445,7 @@ function IntroductionBody() {
   return (
     <>
       <Prose>
-        <strong style={{ color: '#09090B' }}>Sketch</strong> is an infinite-canvas drawing and
+        <strong style={{ color: 'var(--text-primary)' }}>Sketch</strong> is an infinite-canvas drawing and
         diagramming tool — think of an Excalidraw/tldraw-style whiteboard — built end to end as a
         full-stack TypeScript project. It pairs a custom HTML5 Canvas rendering engine with a
         CRDT-backed offline layer and a small cloud backend, so a drawing stays fast on screen,
@@ -510,8 +511,8 @@ function StackBody() {
       <div style={{ display: 'grid', gridTemplateColumns: mob ? '1fr' : 'repeat(2, 1fr)', columnGap: 40, rowGap: 24, marginTop: 20 }}>
         {STACK_GROUPS.map((g) => (
           <div key={g.title}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#09090B' }}>{g.title}</div>
-            <div style={{ fontSize: 12.5, color: '#A1A1AA', margin: '2px 0 0' }}>{g.blurb}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{g.title}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '2px 0 0' }}>{g.blurb}</div>
             <BulletList items={g.items.map((item) => ({ text: item }))} />
           </div>
         ))}
@@ -715,8 +716,8 @@ function PersistenceBody() {
     <>
       <Prose>
         Edits are persisted down two independent paths from the same store. The
-        <strong style={{ color: '#09090B' }}> local path</strong> is synchronous and offline-first;
-        the <strong style={{ color: '#09090B' }}>cloud path</strong> is a debounced REST autosave.
+        <strong style={{ color: 'var(--text-primary)' }}> local path</strong> is synchronous and offline-first;
+        the <strong style={{ color: 'var(--text-primary)' }}>cloud path</strong> is a debounced REST autosave.
         Neither sits in the interaction loop, so saving never blocks drawing.
       </Prose>
       <MermaidDiagram title="flowchart · two save paths, one store" code={DIAG_PERSISTENCE} />
@@ -935,14 +936,14 @@ function ShortcutsBody() {
       <div style={{ display: 'grid', gridTemplateColumns: mob ? '1fr' : 'repeat(2, 1fr)', gap: 18, marginTop: 20 }}>
         {SHORTCUT_GROUPS.map((g) => (
           <div key={g.title}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#52525B', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>{g.title}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>{g.title}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
               {g.rows.map(([label, keys]) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-                  <span style={{ fontSize: 13.5, color: '#52525B' }}>{label}</span>
+                  <span style={{ fontSize: 13.5, color: 'var(--text-secondary)' }}>{label}</span>
                   <kbd style={{
-                    fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 11.5, color: '#3F3F46',
-                    background: '#F4F4F5', border: '1px solid #E4E4E7', borderRadius: 5, padding: '2px 7px',
+                    fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 11.5, color: 'var(--text-secondary)',
+                    background: 'var(--hover-bg)', border: '1px solid var(--panel-border)', borderRadius: 5, padding: '2px 7px',
                     whiteSpace: 'nowrap', textAlign: 'right',
                   }}>{keys}</kbd>
                 </div>
@@ -958,14 +959,14 @@ function ShortcutsBody() {
 // ── Section content: API endpoints ────────────────────────────────────────────
 
 const METHOD_COLORS: Record<string, { bg: string; fg: string }> = {
-  GET:    { bg: '#EFF6FF', fg: '#3B82F6' },
-  POST:   { bg: '#F0FDF4', fg: '#22C55E' },
-  PUT:    { bg: '#FFF7ED', fg: '#F59E0B' },
-  DELETE: { bg: '#FEF2F2', fg: '#EF4444' },
+  GET:    { bg: 'rgba(59,130,246,0.12)', fg: '#3B82F6' },
+  POST:   { bg: 'rgba(34,197,94,0.12)', fg: '#22C55E' },
+  PUT:    { bg: 'rgba(245,158,11,0.12)', fg: '#F59E0B' },
+  DELETE: { bg: 'rgba(239,68,68,0.12)', fg: '#EF4444' },
 };
 
 function MethodBadge({ method }: { method: string }) {
-  const c = METHOD_COLORS[method] ?? { bg: '#F4F4F5', fg: '#71717A' };
+  const c = METHOD_COLORS[method] ?? { bg: 'var(--hover-bg)', fg: 'var(--text-faint)' };
   return (
     <span style={{
       display: 'inline-block', minWidth: 50, textAlign: 'center', padding: '3px 8px', borderRadius: 5,
@@ -1020,20 +1021,20 @@ function ApiBody() {
       </Prose>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20, maxWidth: 680 }}>
         {API_GROUPS.map((group) => (
-          <div key={group.title} style={{ border: '1px solid #E4E4E7', borderRadius: 12, overflow: 'hidden' }}>
+          <div key={group.title} style={{ border: '1px solid var(--panel-border)', borderRadius: 12, overflow: 'hidden' }}>
             <div style={{
-              padding: '10px 16px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0',
-              fontSize: 12, fontWeight: 700, color: '#52525B', letterSpacing: '0.04em', textTransform: 'uppercase',
+              padding: '10px 16px', background: 'var(--panel-bg-2)', borderBottom: '1px solid var(--divider)',
+              fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase',
             }}>{group.title}</div>
             <div>
               {group.routes.map((r, i) => (
                 <div key={r.path + r.method} style={{
                   display: 'flex', alignItems: 'center', gap: 14, padding: '11px 16px',
-                  borderTop: i > 0 ? '1px solid #F4F4F5' : undefined, flexWrap: 'wrap',
+                  borderTop: i > 0 ? '1px solid var(--divider)' : undefined, flexWrap: 'wrap',
                 }}>
                   <MethodBadge method={r.method} />
-                  <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 12.5, color: '#18181B', fontWeight: 600 }}>{r.path}</code>
-                  <span style={{ fontSize: 12.5, color: '#A1A1AA', marginLeft: 'auto' }}>{r.detail}</span>
+                  <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 12.5, color: 'var(--text-primary)', fontWeight: 600 }}>{r.path}</code>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-muted)', marginLeft: 'auto' }}>{r.detail}</span>
                 </div>
               ))}
             </div>
@@ -1093,7 +1094,7 @@ function ChevronIcon({ collapsed }: { collapsed: boolean }) {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
       style={{ transform: collapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}>
-      <path d="M2.5 4L5 6.25L7.5 4" stroke="#A1A1AA" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2.5 4L5 6.25L7.5 4" stroke="var(--text-muted)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -1105,7 +1106,7 @@ function Sidebar({ active, onNavigate, collapsedGroups, onToggleGroup }: {
   onToggleGroup: (label: string) => void;
 }) {
   return (
-    <nav style={{ width: 248, flexShrink: 0, borderRight: '1px solid #F0F0F0', overflowY: 'auto', padding: '24px 14px' }}>
+    <nav style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--divider)', overflowY: 'auto', padding: '24px 14px' }}>
       {NAV_GROUPS.map((group) => {
         const isCollapsed = collapsedGroups.has(group.label);
         return (
@@ -1115,7 +1116,7 @@ function Sidebar({ active, onNavigate, collapsedGroups, onToggleGroup }: {
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
                 background: 'none', border: 'none', cursor: 'pointer', padding: '5px 10px',
-                fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#A1A1AA',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)',
               }}
             >
               {group.label}
@@ -1132,14 +1133,14 @@ function Sidebar({ active, onNavigate, collapsedGroups, onToggleGroup }: {
                         style={{
                           display: 'block', width: '100%', textAlign: 'left',
                           padding: '6px 12px', margin: '1px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
-                          background: isActive ? '#F4F4F5' : 'transparent',
-                          borderLeft: `2px solid ${isActive ? '#18181B' : 'transparent'}`,
+                          background: isActive ? 'var(--hover-bg)' : 'transparent',
+                          borderLeft: `2px solid ${isActive ? 'var(--text-primary)' : 'transparent'}`,
                           fontSize: 13.5, fontWeight: isActive ? 600 : 400,
-                          color: isActive ? '#09090B' : '#71717A',
+                          color: isActive ? 'var(--text-primary)' : 'var(--text-faint)',
                           transition: 'background 0.12s, color 0.12s',
                         }}
-                        onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = '#18181B'; }}
-                        onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = '#71717A'; }}
+                        onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+                        onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'var(--text-faint)'; }}
                       >{item.label}</button>
                     </li>
                   );
@@ -1159,8 +1160,8 @@ function MobileNav({ active, onNavigate }: { active: SectionId; onNavigate: (id:
   return (
     <div style={{
       display: 'flex', gap: 6, overflowX: 'auto', padding: '12px 20px',
-      borderBottom: '1px solid #F0F0F0', flexShrink: 0,
-      position: 'sticky', top: 0, zIndex: 2, background: '#fff',
+      borderBottom: '1px solid var(--divider)', flexShrink: 0,
+      position: 'sticky', top: 0, zIndex: 2, background: 'var(--panel-bg)',
     }}>
       {FLAT_ITEMS.map((item) => {
         const isActive = active === item.id;
@@ -1170,8 +1171,8 @@ function MobileNav({ active, onNavigate }: { active: SectionId; onNavigate: (id:
             onClick={() => onNavigate(item.id)}
             style={{
               padding: '6px 13px', borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
-              border: `1px solid ${isActive ? '#18181B' : '#E4E4E7'}`,
-              background: isActive ? '#18181B' : '#fff', color: isActive ? '#fff' : '#52525B',
+              border: `1px solid ${isActive ? 'var(--text-primary)' : 'var(--panel-border)'}`,
+              background: isActive ? 'var(--text-primary)' : 'var(--panel-bg)', color: isActive ? 'var(--panel-bg)' : 'var(--text-secondary)',
               fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
               transition: 'background 0.12s, border-color 0.12s, color 0.12s',
             }}
@@ -1188,18 +1189,20 @@ function Header() {
   return (
     <header style={{
       flexShrink: 0, height: 54, display: 'flex', alignItems: 'center', gap: 10,
-      padding: '0 24px', borderBottom: '1px solid #F0F0F0', background: '#fff',
+      padding: '0 24px', borderBottom: '1px solid var(--divider)', background: 'var(--panel-bg)',
     }}>
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-        <div style={{ width: 26, height: 26, borderRadius: 6, background: '#18181B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8H13M8 3V13" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+            <path d="M3 8H13M8 3V13" stroke="var(--panel-bg)" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
-        <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', color: '#09090B' }}>Sketch</span>
+        <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Sketch</span>
       </Link>
-      <span style={{ fontSize: 14, color: '#D4D4D8' }}>/</span>
-      <span style={{ fontSize: 14, color: '#A1A1AA', fontWeight: 500 }}>Docs</span>
+      <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>/</span>
+      <span style={{ fontSize: 14, color: 'var(--text-muted)', fontWeight: 500 }}>Docs</span>
+      <div style={{ flex: 1 }} />
+      <ThemeToggle variant="inline" />
     </header>
   );
 }
@@ -1251,7 +1254,7 @@ export function DocsPage() {
   return (
     <div style={{
       height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      background: '#fff', fontFamily: 'Inter, system-ui, sans-serif', color: '#09090B',
+      background: 'var(--panel-bg)', fontFamily: 'Inter, system-ui, sans-serif', color: 'var(--text-primary)',
     }}>
       <Header />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
@@ -1279,8 +1282,8 @@ export function DocsPage() {
                   data-section-id={item.id}
                   style={{ scrollMarginTop: mob ? 104 : 24 }}
                 >
-                  {i > 0 && <hr style={{ border: 'none', borderTop: '1px solid #F0F0F0', margin: '44px 0' }} />}
-                  <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', color: '#09090B', margin: i === 0 ? '40px 0 0' : 0 }}>
+                  {i > 0 && <hr style={{ border: 'none', borderTop: '1px solid var(--divider)', margin: '44px 0' }} />}
+                  <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: i === 0 ? '40px 0 0' : 0 }}>
                     {title}
                   </h2>
                   <Body />

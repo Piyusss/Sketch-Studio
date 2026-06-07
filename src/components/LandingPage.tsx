@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { UserMenu } from './UserMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -650,15 +651,15 @@ function FeatureSection({ label, title, description, visual, reverse = false }: 
           <span style={{
             display: 'inline-block', fontSize: 11, fontWeight: 600,
             letterSpacing: '0.09em', textTransform: 'uppercase',
-            color: '#A1A1AA', marginBottom: mob ? 10 : 16,
+            color: 'var(--text-muted)', marginBottom: mob ? 10 : 16,
           }}>{label}</span>
         </motion.div>
         <motion.h2 variants={fadeUp} style={{
           fontSize: mob ? 24 : 36, fontWeight: 800, lineHeight: 1.14,
-          letterSpacing: '-0.02em', color: '#09090B', margin: `0 0 ${mob ? '12px' : '18px'}`,
+          letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: `0 0 ${mob ? '12px' : '18px'}`,
         }}>{title}</motion.h2>
         <motion.p variants={fadeUp} style={{
-          fontSize: mob ? 14 : 16, lineHeight: 1.65, color: '#71717A', margin: 0,
+          fontSize: mob ? 14 : 16, lineHeight: 1.65, color: 'var(--text-faint)', margin: 0,
         }}>{description}</motion.p>
       </motion.div>
 
@@ -718,7 +719,7 @@ function FaqList() {
             transition={{ duration: 0.4, delay: i * 0.06 }}
             viewport={{ once: true }}
             style={{
-              borderBottom: '1px solid #F0F0F0',
+              borderBottom: '1px solid var(--divider)',
               overflow: 'hidden',
             }}
           >
@@ -732,7 +733,7 @@ function FaqList() {
               }}
             >
               <span style={{
-                fontSize: 16, fontWeight: 600, color: '#09090B',
+                fontSize: 16, fontWeight: 600, color: 'var(--text-primary)',
                 letterSpacing: '-0.01em', lineHeight: 1.4,
               }}>{item.q}</span>
               <motion.span
@@ -740,9 +741,9 @@ function FaqList() {
                 transition={{ duration: 0.2 }}
                 style={{
                   flexShrink: 0, width: 22, height: 22,
-                  borderRadius: '50%', background: isOpen ? '#09090B' : '#F4F4F5',
+                  borderRadius: '50%', background: isOpen ? 'var(--text-primary)' : 'var(--hover-bg)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, color: isOpen ? '#fff' : '#52525B',
+                  fontSize: 16, color: isOpen ? 'var(--panel-bg)' : 'var(--text-secondary)',
                   lineHeight: 1,
                 }}
               >+</motion.span>
@@ -754,7 +755,7 @@ function FaqList() {
               style={{ overflow: 'hidden' }}
             >
               <p style={{
-                margin: '0 0 22px', fontSize: 15, color: '#52525B',
+                margin: '0 0 22px', fontSize: 15, color: 'var(--text-secondary)',
                 lineHeight: 1.72, paddingRight: 40,
               }}>{item.a}</p>
             </motion.div>
@@ -829,9 +830,9 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
 
   return (
     <div style={{
-      minHeight: '100vh', background: '#fff',
+      minHeight: '100vh', background: 'var(--panel-bg)',
       fontFamily: 'Inter, system-ui, sans-serif',
-      color: '#09090B', overflowX: 'hidden',
+      color: 'var(--text-primary)', overflowX: 'hidden',
     }}>
 
       {/* ── Nav ────────────────────────────────────────────────────────────── */}
@@ -842,42 +843,43 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
           position: 'sticky', top: 0, zIndex: 100,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: mobile ? '0 16px' : '0 48px', height: 56,
-          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #F0F0F0',
+          background: 'var(--panel-translucent)', backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid var(--divider)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 7,
-            background: '#18181B',
+            background: 'var(--text-primary)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <path d="M3 8H13M8 3V13" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+              <path d="M3 8H13M8 3V13" stroke="var(--panel-bg)" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <span style={{ fontWeight: 700, fontSize: mobile ? 15 : 17, letterSpacing: '-0.02em' }}>Sketch</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 4 : 8 }}>
+          <ThemeToggle variant="inline" />
           <Link
             to="/docs"
             style={{
               padding: mobile ? '6px 10px' : '7px 14px', borderRadius: 8, border: 'none',
               background: 'transparent', fontSize: 13, fontWeight: 600,
-              color: '#52525B', cursor: 'pointer', textDecoration: 'none',
+              color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'none',
               display: 'inline-block',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#09090B'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#52525B'; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
           >Docs</Link>
           {isSignedIn ? (
             <>
-              {!mobile && <span style={{ fontSize: 13, color: '#52525B', fontWeight: 500 }}>{user.name}</span>}
+              {!mobile && <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>{user.name}</span>}
               <button onClick={onGoToApp} style={{
                 padding: mobile ? '6px 12px' : '7px 18px', borderRadius: 8, border: 'none',
-                background: '#18181B', fontSize: 13, fontWeight: 600,
-                color: '#fff', cursor: 'pointer',
+                background: 'var(--text-primary)', fontSize: 13, fontWeight: 600,
+                color: 'var(--panel-bg)', cursor: 'pointer',
               }}>{mobile ? 'Open →' : 'Open app →'}</button>
               <UserMenu />
             </>
@@ -899,9 +901,9 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '4px 10px', borderRadius: 4,
-              background: '#F4F4F5', color: '#52525B',
+              background: 'var(--hover-bg)', color: 'var(--text-secondary)',
               fontSize: 11, fontWeight: 600, letterSpacing: '0.02em',
-              border: '1px solid #E4E4E7',
+              border: '1px solid var(--panel-border)',
             }}>
               This project is made for educational purposes by Piyush Raj
             </span>
@@ -909,14 +911,14 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
 
           <motion.h1 variants={fadeUp} style={{
             fontSize: mobile ? 34 : 58, fontWeight: 800, lineHeight: 1.08,
-            letterSpacing: '-0.03em', margin: '0 0 16px', color: '#09090B',
+            letterSpacing: '-0.03em', margin: '0 0 16px', color: 'var(--text-primary)',
           }}>
             Design without<br />
-            <span style={{ color: '#3B82F6' }}>boundaries.</span>
+            <span style={{ color: 'var(--accent)' }}>boundaries.</span>
           </motion.h1>
 
           <motion.p variants={fadeUp} style={{
-            fontSize: mobile ? 15 : 18, color: '#71717A', lineHeight: 1.6,
+            fontSize: mobile ? 15 : 18, color: 'var(--text-faint)', lineHeight: 1.6,
             margin: `0 0 ${mobile ? '24px' : '36px'}`,
           }}>
             An infinite canvas for architects, designers, and engineers.
@@ -927,8 +929,8 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
             {isSignedIn ? (
               <button onClick={onGoToApp} style={{
                 padding: mobile ? '12px 22px' : '13px 28px', borderRadius: 10, border: 'none',
-                background: '#18181B', fontSize: 15, fontWeight: 600,
-                color: '#fff', cursor: 'pointer', width: mobile ? '100%' : undefined,
+                background: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
+                color: 'var(--panel-bg)', cursor: 'pointer', width: mobile ? '100%' : undefined,
               }}>Open your workspace →</button>
             ) : (
               <GoogleSignInButton />
@@ -940,7 +942,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
       </section>
 
       {/* ── Feature sections ─────────────────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid #F0F0F0' }}>
+      <div style={{ borderTop: '1px solid var(--divider)' }}>
 
         {/* Section intro */}
         <div style={{ textAlign: 'center', padding: mobile ? '40px 20px 0' : '80px 48px 0' }}>
@@ -950,12 +952,12 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
           >
             <span style={{
               fontSize: 11, fontWeight: 600, letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: '#A1A1AA',
+              textTransform: 'uppercase', color: 'var(--text-muted)',
               display: 'block', marginBottom: 14,
             }}>Built for makers</span>
             <h2 style={{
               fontSize: mobile ? 28 : 44, fontWeight: 800, letterSpacing: '-0.03em',
-              margin: 0, color: '#09090B', lineHeight: 1.1,
+              margin: 0, color: 'var(--text-primary)', lineHeight: 1.1,
             }}>
               Everything you need<br />to think visually
             </h2>
@@ -963,7 +965,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </div>
 
         {/* 1 — Infinite Canvas */}
-        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: 'var(--panel-bg)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Canvas" title="Think without boundaries"
               description="An infinite workspace that grows with your ideas. Sketch system diagrams, plan architecture, map user flows - then zoom out to see the complete picture."
@@ -972,7 +974,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </section>
 
         {/* 2 — Sync */}
-        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: 'var(--panel-bg-2)', borderTop: '1px solid var(--divider)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Persistence" title="Your work, always where you left it"
               description="Every change is saved locally and synced to the cloud so your canvases are available on any device. Nothing is ever lost."
@@ -981,7 +983,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </section>
 
         {/* 3 — Visual Editing */}
-        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: 'var(--panel-bg)', borderTop: '1px solid var(--divider)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Editing" title="Built for visual thinking"
               description="Shapes, connectors, text, images, freehand strokes - every element lives in the same canvas. Select, resize, rotate, group, and lock anything."
@@ -990,7 +992,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </section>
 
         {/* 4 — Pen */}
-        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#FAFAFA', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: 'var(--panel-bg-2)', borderTop: '1px solid var(--divider)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Drawing" title="Freehand input, precisely rendered"
               description="Draw naturally with a stylus or finger. Smooth bezier interpolation captures the fluidity of a real whiteboard. Mix freehand strokes with shapes and text."
@@ -999,7 +1001,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </section>
 
         {/* 5 — Mermaid */}
-        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: 'var(--panel-bg)', borderTop: '1px solid var(--divider)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Diagrams" title="Mermaid to diagram conversion"
               description="Paste any Mermaid flowchart and it instantly becomes fully editable canvas elements - shapes, arrows, and labels you can move, restyle, and extend."
@@ -1008,7 +1010,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </section>
 
         {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-        <section style={{ padding: mobile ? '48px 20px 60px' : '80px 48px 100px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
+        <section style={{ padding: mobile ? '48px 20px 60px' : '80px 48px 100px', background: 'var(--panel-bg)', borderTop: '1px solid var(--divider)' }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }} viewport={{ once: true }}
@@ -1016,9 +1018,9 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
             >
               <h3 style={{
                 fontSize: mobile ? 24 : 34, fontWeight: 800, letterSpacing: '-0.02em',
-                color: '#09090B', margin: '0 0 10px',
+                color: 'var(--text-primary)', margin: '0 0 10px',
               }}>About This Project</h3>
-              <p style={{ fontSize: mobile ? 14 : 16, color: '#71717A', margin: 0 }}>
+              <p style={{ fontSize: mobile ? 14 : 16, color: 'var(--text-faint)', margin: 0 }}>
                 Things you might be curious about before diving in.
               </p>
             </motion.div>
@@ -1033,21 +1035,21 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         transition={{ duration: 0.6 }} viewport={{ once: true }}
         style={{
           padding: mobile ? '56px 20px' : '100px 48px', textAlign: 'center',
-          background: '#09090B',
+          background: 'var(--text-primary)',
         }}
       >
         <h2 style={{
           fontSize: mobile ? 28 : 42, fontWeight: 800, letterSpacing: '-0.02em',
-          margin: '0 0 12px', color: '#fff',
+          margin: '0 0 12px', color: 'var(--panel-bg)',
         }}>Ready to start?</h2>
-        <p style={{ fontSize: mobile ? 14 : 16, color: '#71717A', margin: '0 0 28px' }}>
+        <p style={{ fontSize: mobile ? 14 : 16, color: 'var(--text-faint)', margin: '0 0 28px' }}>
           Free forever.
         </p>
         {isSignedIn ? (
           <button onClick={onGoToApp} style={{
-            padding: '14px 36px', borderRadius: 12, border: '1px solid #3F3F46',
-            background: '#fff', fontSize: 16, fontWeight: 700,
-            color: '#09090B', cursor: 'pointer',
+            padding: '14px 36px', borderRadius: 12, border: '1px solid var(--text-faint)',
+            background: 'var(--panel-bg)', fontSize: 16, fontWeight: 700,
+            color: 'var(--text-primary)', cursor: 'pointer',
           }}>Open your workspace</button>
         ) : (
           <GoogleSignInButton />
@@ -1056,14 +1058,14 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
 
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer style={{
-        borderTop: '1px solid #F0F0F0', padding: '24px 48px',
+        borderTop: '1px solid var(--divider)', padding: '24px 48px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 22, height: 22, borderRadius: 5, background: '#18181B' }} />
-          <span style={{ fontWeight: 700, fontSize: 14, color: '#374151' }}>Sketch</span>
+          <div style={{ width: 22, height: 22, borderRadius: 5, background: 'var(--text-primary)' }} />
+          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-secondary)' }}>Sketch</span>
         </div>
-        <span style={{ fontSize: 12, color: '#A1A1AA' }}>Built for makers</span>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Built for makers</span>
       </footer>
     </div>
   );
