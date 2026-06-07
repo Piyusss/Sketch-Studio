@@ -30,17 +30,6 @@ function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center',
-      padding: '5px 11px', borderRadius: 6,
-      background: '#F4F4F5', border: '1px solid #E4E4E7',
-      fontSize: 12.5, fontWeight: 500, color: '#374151',
-    }}>{children}</span>
-  );
-}
-
 // Shared flowchart primitives — hand-drawn boxes/arrows in the same visual
 // language as the landing page's other mockups, reused by every diagram below
 // instead of pulling in a Mermaid renderer just for a few static figures.
@@ -155,19 +144,21 @@ function StackSection() {
       </p>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: mob ? '1fr' : 'repeat(3, 1fr)',
-        gap: 14,
+        gridTemplateColumns: mob ? '1fr' : 'repeat(2, 1fr)',
+        columnGap: 36, rowGap: 26,
       }}>
         {STACK_GROUPS.map((g) => (
-          <div key={g.title} style={{
-            border: '1px solid #E4E4E7', borderRadius: 12, padding: '16px 18px',
-            background: '#FAFAFA',
-          }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#09090B', marginBottom: 2 }}>{g.title}</div>
-            <div style={{ fontSize: 12.5, color: '#A1A1AA', marginBottom: 12 }}>{g.blurb}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {g.items.map((item) => <Pill key={item}>{item}</Pill>)}
-            </div>
+          <div key={g.title}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#09090B' }}>{g.title}</div>
+            <div style={{ fontSize: 12.5, color: '#A1A1AA', margin: '2px 0 10px' }}>{g.blurb}</div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {g.items.map((item) => (
+                <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: '#374151' }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         ))}
       </div>
@@ -186,7 +177,6 @@ const JOURNEY_STEPS = [
 ];
 
 function WorkflowSection() {
-  const mob = useIsMobile();
   return (
     <div>
       <SectionHeading kicker="How a session flows" title="User workflow" />
@@ -194,37 +184,23 @@ function WorkflowSection() {
         From landing on the homepage to having a synced, shareable canvas — the whole
         journey is five short steps.
       </p>
-      <div style={{
-        display: 'flex', flexDirection: mob ? 'column' : 'row',
-        border: '1px solid #E4E4E7', borderRadius: 12, overflow: 'hidden', background: '#fff',
-      }}>
-        {JOURNEY_STEPS.map((s, i) => (
-          <div key={s.n} style={{
-            flex: 1, padding: '18px 18px',
-            borderTop: mob && i > 0 ? '1px solid #F0F0F0' : undefined,
-            borderLeft: !mob && i > 0 ? '1px solid #F0F0F0' : undefined,
-            position: 'relative',
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#A1A1AA', letterSpacing: '0.06em', marginBottom: 8 }}>{s.n}</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#09090B', marginBottom: 5 }}>{s.title}</div>
-            <div style={{ fontSize: 12.5, color: '#71717A', lineHeight: 1.55 }}>{s.detail}</div>
-            {!mob && i < JOURNEY_STEPS.length - 1 && (
-              <div style={{
-                position: 'absolute', top: 18, right: -7, zIndex: 1,
-                width: 14, height: 14, borderRadius: '50%',
-                background: '#fff', border: '1px solid #E4E4E7',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="7" height="7" viewBox="0 0 8 8" fill="none">
-                  <path d="M1 1L5.5 4L1 7" stroke="#A1A1AA" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            )}
-          </div>
+      <ol style={{ margin: '0 0 36px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {JOURNEY_STEPS.map((s) => (
+          <li key={s.n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+            <span style={{
+              flexShrink: 0, marginTop: 1, width: 22, height: 22, borderRadius: '50%',
+              background: '#F4F4F5', color: '#71717A', fontSize: 10.5, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>{s.n}</span>
+            <div style={{ lineHeight: 1.6 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#09090B' }}>{s.title}</span>
+              <span style={{ fontSize: 13, color: '#71717A' }}> — {s.detail}</span>
+            </div>
+          </li>
         ))}
-      </div>
+      </ol>
 
-      <div style={{ marginTop: 28 }}>
+      <div>
         <div style={{ fontSize: 14, fontWeight: 700, color: '#09090B', marginBottom: 10 }}>From input to pixels</div>
         <p style={{ fontSize: 14, color: '#52525B', lineHeight: 1.7, margin: '0 0 16px', maxWidth: 640 }}>
           Drawing has to feel instant. Every pointer move only ever touches the in-memory
@@ -259,47 +235,15 @@ function RenderLoopDiagram() {
 
 // ── Features ─────────────────────────────────────────────────────────────────
 
-const FEATURES: { icon: React.ReactNode; title: string; detail: string }[] = [
-  {
-    icon: <path d="M3 8a5 5 0 0110 0 5 5 0 0010 0" />,
-    title: 'Infinite canvas',
-    detail: 'Smooth pan, zoom, camera easing, and a live minimap.',
-  },
-  {
-    icon: <><rect x="3" y="3" width="8" height="8" rx="1.5" /><circle cx="17" cy="7" r="4" /><path d="M7 11v6a2 2 0 002 2h8" /></>,
-    title: 'Rich element types',
-    detail: 'Shapes, connectors, text, images, and freehand pen strokes.',
-  },
-  {
-    icon: <><rect x="3" y="4" width="8" height="6" rx="1.5" /><rect x="13" y="14" width="8" height="6" rx="1.5" /><path d="M7 10v4a2 2 0 002 2h4" /></>,
-    title: 'Mermaid → canvas',
-    detail: 'Paste flowchart syntax; a Sugiyama-layout pass lays out real, editable shapes.',
-  },
-  {
-    icon: <><path d="M7 18a4 4 0 01-1-7.9A6 6 0 0118 9a4.5 4.5 0 01-1 8.9" /><path d="M12 12v6m0-6l-2.5 2.5M12 12l2.5 2.5" /></>,
-    title: 'Cloud + offline sync',
-    detail: 'Postgres autosave every few seconds, Yjs/IndexedDB instant local cache.',
-  },
-  {
-    icon: <><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.3 10.7l7.4-3.4M8.3 13.3l7.4 3.4" /></>,
-    title: 'Shareable links',
-    detail: 'Share a canvas read-only, or open it up for collaborative editing.',
-  },
-  {
-    icon: <><path d="M12 3v12m0 0l-4-4m4 4l4-4" /><path d="M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" /></>,
-    title: 'Export anywhere',
-    detail: 'One-click export to PNG, SVG, or PDF.',
-  },
-  {
-    icon: <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 9h8M8 13h5" /></>,
-    title: 'Command palette',
-    detail: 'Keyboard-first navigation and actions, ⌘K away.',
-  },
-  {
-    icon: <><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 000 16z" fill="#3B82F6" stroke="none" /></>,
-    title: 'Light & dark themes',
-    detail: 'New elements automatically pick a legible ink color for the canvas behind them.',
-  },
+const FEATURES: { title: string; detail: string }[] = [
+  { title: 'Infinite canvas', detail: 'Smooth pan, zoom, camera easing, and a live minimap.' },
+  { title: 'Rich element types', detail: 'Shapes, connectors, text, images, and freehand pen strokes.' },
+  { title: 'Mermaid → canvas', detail: 'Paste flowchart syntax; a Sugiyama-layout pass lays out real, editable shapes.' },
+  { title: 'Cloud + offline sync', detail: 'Postgres autosave every few seconds, Yjs/IndexedDB instant local cache.' },
+  { title: 'Shareable links', detail: 'Share a canvas read-only, or open it up for collaborative editing.' },
+  { title: 'Export anywhere', detail: 'One-click export to PNG, SVG, or PDF.' },
+  { title: 'Command palette', detail: 'Keyboard-first navigation and actions, ⌘K away.' },
+  { title: 'Light & dark themes', detail: 'New elements automatically pick a legible ink color for the canvas behind them.' },
 ];
 
 function FeaturesSection() {
@@ -307,31 +251,21 @@ function FeaturesSection() {
   return (
     <div>
       <SectionHeading kicker="What you can do" title="Features" />
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: mob ? '1fr' : 'repeat(2, 1fr)',
-        gap: 12,
+      <ul style={{
+        margin: 0, padding: 0, listStyle: 'none',
+        display: 'grid', gridTemplateColumns: mob ? '1fr' : 'repeat(2, 1fr)',
+        columnGap: 36, rowGap: 14,
       }}>
         {FEATURES.map((f) => (
-          <div key={f.title} style={{
-            display: 'flex', gap: 14, alignItems: 'flex-start',
-            border: '1px solid #E4E4E7', borderRadius: 12, padding: '16px 18px', background: '#fff',
-          }}>
-            <div style={{
-              flexShrink: 0, width: 36, height: 36, borderRadius: 9,
-              background: '#F4F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                {f.icon}
-              </svg>
+          <li key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <span style={{ flexShrink: 0, marginTop: 7, width: 5, height: 5, borderRadius: '50%', background: '#3B82F6' }} />
+            <div style={{ lineHeight: 1.6 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#09090B' }}>{f.title}</span>
+              <span style={{ fontSize: 13, color: '#71717A' }}> — {f.detail}</span>
             </div>
-            <div>
-              <div style={{ fontSize: 14.5, fontWeight: 700, color: '#09090B', marginBottom: 4 }}>{f.title}</div>
-              <div style={{ fontSize: 13, color: '#71717A', lineHeight: 1.6 }}>{f.detail}</div>
-            </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
