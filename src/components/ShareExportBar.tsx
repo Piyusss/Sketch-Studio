@@ -19,9 +19,9 @@ const btn: React.CSSProperties = {
 function Toast({ msg }: { msg: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
       style={{
-        position: 'absolute', top: 44, right: 0, whiteSpace: 'nowrap',
+        position: 'absolute', bottom: 44, left: 0, whiteSpace: 'nowrap',
         background: '#18181B', color: '#fff', fontSize: 12, fontWeight: 500,
         padding: '6px 12px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
       }}
@@ -124,7 +124,7 @@ export function ShareExportBar() {
   return (
     <div
       ref={wrapRef}
-      style={{ position: 'absolute', top: 14, right: 14, zIndex: 200, display: 'flex', gap: 8 }}
+      style={{ position: 'absolute', bottom: 16, left: 100, zIndex: 200, display: 'flex', gap: 8 }}
     >
       <div style={{ position: 'relative' }}>
         <button style={{ ...btn, ...(exportOpen ? { background: 'var(--panel-bg)' } : {}) }} title="Export canvas"
@@ -138,12 +138,12 @@ export function ShareExportBar() {
         <AnimatePresence>
           {exportOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.97 }}
+              initial={{ opacity: 0, y: 8, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
+              exit={{ opacity: 0, y: 8, scale: 0.97 }}
               transition={{ duration: 0.14 }}
               style={{
-                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
                 width: 220, background: 'var(--panel-bg)', borderRadius: 12,
                 border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow-lg)',
                 padding: 6, fontFamily: 'Inter, system-ui, sans-serif',
@@ -190,12 +190,12 @@ export function ShareExportBar() {
         <AnimatePresence>
           {shareOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.97 }}
+              initial={{ opacity: 0, y: 8, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
+              exit={{ opacity: 0, y: 8, scale: 0.97 }}
               transition={{ duration: 0.15 }}
               style={{
-                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
                 width: 320, background: 'var(--panel-bg)', borderRadius: 12,
                 border: '1px solid var(--panel-border)', boxShadow: 'var(--panel-shadow-lg)',
                 padding: 16, fontFamily: 'Inter, system-ui, sans-serif',

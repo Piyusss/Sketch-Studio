@@ -303,14 +303,6 @@ export function PropertiesPanel() {
 
   return (
     <div style={panelStyle}>
-      {/* Position */}
-      <Section title="Position">
-        <div style={row2}>
-          <NumInput label="X" value={avg('x')} onChange={(v) => update({ x: v })} />
-          <NumInput label="Y" value={avg('y')} onChange={(v) => update({ y: v })} />
-        </div>
-      </Section>
-
       {/* Size */}
       <Section title="Size">
         <div style={row2}>
