@@ -66,9 +66,15 @@ export function Minimap() {
       const store = useCanvasStore.getState();
       const objs = Object.values(store.objects);
 
-      // Cheap change-signature so we skip redundant repaints.
+      // Cheap change-signature so we skip redundant repaints. `updatedAt` is
+      // bumped by `updateObject` on every move/resize tick, so tracking the
+      // newest one keeps the minimap live while dragging — not just at rest.
+      let lastUpdate = 0;
+      for (const o of objs) {
+        if (!o.parentId && o.updatedAt > lastUpdate) lastUpdate = o.updatedAt;
+      }
       const theme = document.documentElement.dataset.theme ?? 'light';
-      const nextSig = `${objs.length}:${Math.round(cam.x)}:${Math.round(cam.y)}:${cam.zoom.toFixed(3)}:${store.selectedIds.length}:${theme}`;
+      const nextSig = `${objs.length}:${Math.round(cam.x)}:${Math.round(cam.y)}:${cam.zoom.toFixed(3)}:${store.selectedIds.length}:${theme}:${lastUpdate}`;
       if (nextSig === sig) return;
       sig = nextSig;
 
