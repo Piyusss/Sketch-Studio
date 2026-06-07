@@ -14,9 +14,9 @@ const PALETTE: { label: string; value: string; group: string }[] = [
   { label: 'Blush',     value: '#FFE8ED',  group: 'Warm' },
   { label: 'Butter',    value: '#FFFDE8',  group: 'Warm' },
   { label: 'Cream',     value: '#FFF8E1',  group: 'Warm' },
-  { label: 'Graphite',  value: '#2E2E3A',  group: 'Dark' },
+  { label: 'Charcoal',  value: '#1C1C1C',  group: 'Dark' },
+  { label: 'Onyx',      value: '#161616',  group: 'Dark' },
   { label: 'Void',      value: '#111118',  group: 'Dark' },
-  { label: 'Carbon',    value: '#101010',  group: 'Dark' },
   { label: 'Pitch',     value: '#070709',  group: 'Dark' },
 ];
 

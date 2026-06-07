@@ -89,9 +89,9 @@ function penSvg(o: PenObject): string {
 }
 
 function arrowHeadPolygon(tipX: number, tipY: number, angle: number, size: number, color: string): string {
-  // Same glyph as the canvas renderer: (0,0)(-size,size*0.36)(-size*0.6,0)(-size,-size*0.36)
+  // Same glyph as the canvas renderer: solid triangle (0,0)(-size,size*0.5)(-size,-size*0.5)
   const cos = Math.cos(angle), sin = Math.sin(angle);
-  const local = [[0, 0], [-size, size * 0.36], [-size * 0.6, 0], [-size, -size * 0.36]];
+  const local = [[0, 0], [-size, size * 0.5], [-size, -size * 0.5]];
   const pts = local.map(([lx, ly]) => `${tipX + lx * cos - ly * sin},${tipY + lx * sin + ly * cos}`).join(' ');
   return `<polygon points="${pts}" fill="${esc(color)}" />`;
 }

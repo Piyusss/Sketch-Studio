@@ -29,28 +29,28 @@
 }
 
 :root[data-theme='dark'] {
-  --panel-bg: #1e1e24;
-  --panel-bg-2: #26262e;
-  --panel-translucent: rgba(30, 30, 36, 0.88);
-  --panel-border: #34343c;
+  --panel-bg: #161616;
+  --panel-bg-2: #1c1c1c;
+  --panel-translucent: rgba(22, 22, 22, 0.88);
+  --panel-border: #2e2e2e;
   --panel-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   --panel-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.55);
 
-  --text-primary: #f4f4f5;
-  --text-secondary: #c4c4cc;
-  --text-muted: #8b8b94;
+  --text-primary: #f2f2f2;
+  --text-secondary: #c7c7c7;
+  --text-muted: #8f8f8f;
   --text-faint: #71717a;
 
-  --hover-bg: rgba(255, 255, 255, 0.07);
+  --hover-bg: rgba(255, 255, 255, 0.06);
   --active-bg: rgba(99, 102, 241, 0.22);
   --active-fg: #a5b4fc;
-  --divider: #34343c;
+  --divider: #2a2a2a;
 
-  --input-bg: #2a2a32;
-  --input-border: #3c3c46;
+  --input-bg: #1c1c1c;
+  --input-border: #313131;
 
   --accent: #60a5fa;
-  --scrollbar-thumb: #45454f;
+  --scrollbar-thumb: #3a3a3a;
 }
 
 *, *::before, *::after {

@@ -558,9 +558,8 @@ function drawArrowhead(
   ctx.rotate(angle);
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(-size, size * 0.36);
-  ctx.lineTo(-size * 0.6, 0);
-  ctx.lineTo(-size, -size * 0.36);
+  ctx.lineTo(-size, size * 0.5);
+  ctx.lineTo(-size, -size * 0.5);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
