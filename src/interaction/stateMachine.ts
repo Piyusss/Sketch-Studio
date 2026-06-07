@@ -263,15 +263,17 @@ export class InteractionStateMachine {
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
 
-    // Zoom when:
-    //   • Ctrl/Meta held (covers trackpad pinch — OS injects ctrlKey — and Ctrl+mouse wheel)
-    //   • Plain mouse wheel (large deltaY, negligible deltaX)
-    const isZoom = e.ctrlKey || e.metaKey || Math.abs(e.deltaY) >= 50;
+    // Zoom only when Ctrl/Meta is held (covers trackpad pinch — the OS injects
+    // ctrlKey for that gesture — and Ctrl+mouse-wheel). A plain wheel/trackpad
+    // scroll always pans, so users can scroll the canvas without it hijacking
+    // into a zoom.
+    const isZoom = e.ctrlKey || e.metaKey;
 
     if (isZoom) {
       zoomTowardPoint(this.camera, cx, cy, e.deltaY);
     } else {
-      // Trackpad two-finger pan
+      // Plain scroll: pan. Vertical wheel motion moves the canvas up/down;
+      // trackpad two-finger horizontal motion (deltaX) pans sideways too.
       this.camera.targetX += e.deltaX / this.camera.zoom;
       this.camera.targetY += e.deltaY / this.camera.zoom;
     }
