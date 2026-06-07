@@ -96,8 +96,8 @@ const MAIN_TOOLS: ToolDef[] = [
   { id: 'text',   label: 'Text',   shortcut: 'T', num: 4, icon: <TbTypography size={ICO} /> },
   { id: 'image',  label: 'Image',  shortcut: 'I', num: 5, icon: <TbPhoto     size={ICO} /> },
   { id: 'pen',    label: 'Pen',    shortcut: 'P', num: 6, icon: <TbPencil    size={ICO} /> },
-  { id: 'eraser', label: 'Eraser', shortcut: 'E', num: 7, icon: <TbEraser    size={ICO} /> },
-  { id: 'laser',  label: 'Laser',  shortcut: 'L', num: 8, icon: <TbHighlight size={ICO} style={{ color: '#EF4444' }} /> },
+  { id: 'eraser', label: 'Eraser', shortcut: '',  num: 7, icon: <TbEraser    size={ICO} /> },
+  { id: 'laser',  label: 'Laser',  shortcut: '',  num: 8, icon: <TbHighlight size={ICO} style={{ color: '#EF4444' }} /> },
 ];
 
 // The shapes-dropdown button (rect/ellipse/diamond/line/arrow/frame) shares

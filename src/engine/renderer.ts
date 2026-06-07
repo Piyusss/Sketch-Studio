@@ -37,10 +37,10 @@ function hexLuminance(hex: string): number {
 
 function gridDotColor(bgColor: string): string {
   const lum = hexLuminance(bgColor);
-  if (lum < 0.08) return 'rgba(255,255,255,0.18)';   // near-black bg
-  if (lum < 0.20) return 'rgba(255,255,255,0.22)';   // dark bg
-  if (lum < 0.40) return 'rgba(255,255,255,0.28)';   // mid-dark bg
-  return '#C4C4C8';                                    // light bg
+  if (lum < 0.08) return 'rgba(255,255,255,0.10)';   // near-black bg
+  if (lum < 0.20) return 'rgba(255,255,255,0.13)';   // dark bg
+  if (lum < 0.40) return 'rgba(255,255,255,0.16)';   // mid-dark bg
+  return 'rgba(0,0,0,0.09)';                          // light bg — was a fully-opaque solid grey, now a faint tint
 }
 
 // Expose a render-request callback so image async loads can trigger re-render

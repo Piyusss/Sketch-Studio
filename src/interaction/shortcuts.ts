@@ -42,8 +42,6 @@ const registry: Record<string, Handler> = {
   'p': () => useCanvasStore.getState().setActiveTool('pen'),
   'a': () => useCanvasStore.getState().setActiveTool('arrow'),
   'd': () => useCanvasStore.getState().setActiveTool('diamond'),
-  'e': () => useCanvasStore.getState().setActiveTool('eraser'),
-  'l': () => useCanvasStore.getState().setActiveTool('laser'),
   'f': () => useCanvasStore.getState().setActiveTool('frame'),
 
   // Number-row shortcuts mirroring the toolbar's left-to-right order — the
