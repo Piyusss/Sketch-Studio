@@ -18,6 +18,7 @@ import type {
 import type { LivePenStroke } from '../engine/renderer';
 import { screenToWorld } from '../utils/math';
 import { computeArrowBBox } from '../utils/math';
+import { measureTextBox } from '../utils/textMetrics';
 import { hitTest, getResizeHandleAtPoint, getRotationHandleAtPoint } from '../engine/hitTest';
 import { spatialIndex } from '../engine/spatialIndex';
 import { historyManager } from '../history/historyManager';
@@ -68,6 +69,7 @@ export class InteractionStateMachine {
   private resizeHandle: ResizeHandle | null = null;
   private resizeObjId: string | null = null;
   private resizeStartBounds: { x: number; y: number; width: number; height: number } | null = null;
+  private resizeStartFontSize: number | null = null;
   private resizeStartWorld: Vec2 = { x: 0, y: 0 };
   private arrowResizeStart: { x1: number; y1: number; x2: number; y2: number } | null = null;
 
@@ -483,6 +485,7 @@ export class InteractionStateMachine {
     this.resizeHandle = handle;
     this.resizeObjId = obj.id;
     this.resizeStartBounds = { x: obj.x, y: obj.y, width: obj.width, height: obj.height };
+    this.resizeStartFontSize = obj.type === 'text' ? (obj as TextObject).fontSize : null;
     this.resizeStartWorld = screenToWorld(sp, this.camera);
     if (obj.type === 'arrow') {
       const a = obj as ArrowObject;
@@ -518,6 +521,13 @@ export class InteractionStateMachine {
     const rotation = obj.rotation;
 
     if (rotation === 0) {
+      // Text scales its font size with the drag instead of stretching into an
+      // arbitrary box — the bbox is then re-measured so it always hugs the glyphs.
+      if (obj.type === 'text') {
+        this.updateTextResize(obj as TextObject, h, worldDX, worldDY);
+        return;
+      }
+
       // Fast path: no rotation, simple bounding-box resize
       let nx = x, ny = y, nw = width, nh = height;
       if (h.includes('e')) nw = Math.max(2, width + worldDX);
@@ -559,6 +569,34 @@ export class InteractionStateMachine {
     spatialIndex.insert({ ...obj, x: nx, y: ny, width: newW, height: newH });
   }
 
+  // Dragging a text handle scales its font size uniformly (like resizing an
+  // image) rather than stretching a free-form box — the bbox is then
+  // re-measured from the new font so the selection outline always hugs the
+  // glyphs, with the corner/edge opposite the dragged handle staying anchored.
+  private updateTextResize(obj: TextObject, h: ResizeHandle, worldDX: number, worldDY: number): void {
+    const store = useCanvasStore.getState();
+    if (!this.resizeStartBounds || this.resizeStartFontSize == null) return;
+    const { x, y, width, height } = this.resizeStartBounds;
+    const startFontSize = this.resizeStartFontSize;
+
+    const dragsW = h.includes('e') || h.includes('w');
+    const dragsH = h.includes('n') || h.includes('s');
+    const rawW = dragsW ? Math.max(2, width  + (h.includes('w') ? -worldDX : worldDX)) : width;
+    const rawH = dragsH ? Math.max(2, height + (h.includes('n') ? -worldDY : worldDY)) : height;
+    const scale = dragsW && dragsH ? (rawW / width + rawH / height) / 2 : dragsW ? rawW / width : rawH / height;
+
+    const newFontSize = Math.max(1, startFontSize * scale);
+    const { width: mw, height: mh } = measureTextBox({ ...obj, fontSize: newFontSize });
+
+    const anchorX = h.includes('w') ? x + width  : x;
+    const anchorY = h.includes('n') ? y + height : y;
+    const nx = h.includes('w') ? anchorX - mw : anchorX;
+    const ny = h.includes('n') ? anchorY - mh : anchorY;
+
+    store.updateObject(this.resizeObjId!, { x: nx, y: ny, width: mw, height: mh, fontSize: newFontSize });
+    spatialIndex.insert({ ...obj, x: nx, y: ny, width: mw, height: mh, fontSize: newFontSize });
+  }
+
   private endResize(): void {
     if (!this.resizeObjId || !this.resizeStartBounds) return;
     const store = useCanvasStore.getState();
@@ -591,9 +629,14 @@ export class InteractionStateMachine {
       }
       this.arrowResizeStart = null;
     } else {
-      const from = this.resizeStartBounds;
-      const to = { x: obj.x, y: obj.y, width: obj.width, height: obj.height };
-      if (from.x !== to.x || from.y !== to.y || from.width !== to.width || from.height !== to.height) {
+      const from: Partial<CanvasObject> = { ...this.resizeStartBounds };
+      const to: Partial<CanvasObject> = { x: obj.x, y: obj.y, width: obj.width, height: obj.height };
+      if (obj.type === 'text' && this.resizeStartFontSize != null) {
+        (from as Partial<TextObject>).fontSize = this.resizeStartFontSize;
+        (to as Partial<TextObject>).fontSize = (obj as TextObject).fontSize;
+      }
+      const changed = (Object.keys(to) as (keyof CanvasObject)[]).some((k) => from[k] !== to[k]);
+      if (changed) {
         const id = this.resizeObjId;
         historyManager.push({
           description: 'Resize',
@@ -606,6 +649,7 @@ export class InteractionStateMachine {
     this.resizeHandle = null;
     this.resizeObjId = null;
     this.resizeStartBounds = null;
+    this.resizeStartFontSize = null;
   }
 
   // ── Selection rect ────────────────────────────────────────────────────────
