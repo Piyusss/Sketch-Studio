@@ -47,6 +47,12 @@ function rotatePoint(p: Vec2, around: Vec2, angleDeg: number): Vec2 {
 }
 
 function containsPointArrow(arrow: ArrowObject, p: Vec2, tolerance: number): boolean {
+  // Arrowheads/dots render larger than the line itself — clicking on the
+  // glyph near an endpoint should still hit the arrow, not miss it.
+  const headSize = Math.max(14, arrow.strokeWidth * 5);
+  if (arrow.endHead !== 'none' && Math.hypot(p.x - arrow.x2, p.y - arrow.y2) <= headSize) return true;
+  if (arrow.startHead !== 'none' && Math.hypot(p.x - arrow.x1, p.y - arrow.y1) <= headSize) return true;
+
   if (!arrow.curved || arrow.bendOffset === 0) {
     return distToSegment(p, { x: arrow.x1, y: arrow.y1 }, { x: arrow.x2, y: arrow.y2 }) <= tolerance;
   }
