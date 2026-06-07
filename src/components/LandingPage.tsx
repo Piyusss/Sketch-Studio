@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { UserMenu } from './UserMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { DocsPanelGate } from './DocsPanel';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -825,6 +826,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
   const mobile = useIsMobile();
   const { user } = useAuthStore();
   const isSignedIn = !!user;
+  const [showDocs, setShowDocs] = React.useState(false);
 
   return (
     <div style={{
@@ -858,7 +860,17 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
           <span style={{ fontWeight: 700, fontSize: mobile ? 15 : 17, letterSpacing: '-0.02em' }}>Sketch</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 4 : 8 }}>
+          <button
+            onClick={() => setShowDocs(true)}
+            style={{
+              padding: mobile ? '6px 10px' : '7px 14px', borderRadius: 8, border: 'none',
+              background: 'transparent', fontSize: 13, fontWeight: 600,
+              color: '#52525B', cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#09090B'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#52525B'; }}
+          >Docs</button>
           {isSignedIn ? (
             <>
               {!mobile && <span style={{ fontSize: 13, color: '#52525B', fontWeight: 500 }}>{user.name}</span>}
@@ -1053,6 +1065,8 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         </div>
         <span style={{ fontSize: 12, color: '#A1A1AA' }}>Built for makers</span>
       </footer>
+
+      <DocsPanelGate open={showDocs} onClose={() => setShowDocs(false)} />
     </div>
   );
 }
