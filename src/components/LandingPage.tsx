@@ -691,11 +691,11 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How is data persisted?',
-    a: 'Canvas snapshots (objects, background, grid style) are autosaved to NeonDB every 5 seconds via the REST API. A Yjs CRDT backed by IndexedDB provides instant offline access — the cloud snapshot loads on first open and the local copy keeps updates in-between saves.',
+    a: 'Canvas snapshots (objects, background, grid style) are autosaved to NeonDB every 5 seconds via the REST API. A Yjs CRDT backed by IndexedDB provides instant offline access - the cloud snapshot loads on first open and the local copy keeps updates in-between saves.',
   },
   {
     q: 'What is Mermaid diagram conversion?',
-    a: 'You can paste any Mermaid flowchart syntax and the app parses it, runs a Sugiyama-style layered layout algorithm, and places fully editable native canvas elements — shapes, arrows, and labels — onto the canvas with one click.',
+    a: 'You can paste any Mermaid flowchart syntax and the app parses it, runs a Sugiyama-style layered layout algorithm, and places fully editable native canvas elements like shapes, arrows, and labels onto the canvas with one click.',
   },
   {
     q: 'Is it production-ready?',
@@ -891,7 +891,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
               fontSize: 11, fontWeight: 600, letterSpacing: '0.02em',
               border: '1px solid #E4E4E7',
             }}>
-              Built for learning · exploring engineering behind canvas tools
+              This project is made for educational purposes by Piyush Raj
             </span>
           </motion.div>
 
@@ -908,7 +908,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
             margin: `0 0 ${mobile ? '24px' : '36px'}`,
           }}>
             An infinite canvas for architects, designers, and engineers.
-            Draw, organise, and think clearly — all in one place.
+            Draw, organise, and think clearly - all in one place.
           </motion.p>
 
           <motion.div variants={fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
@@ -954,7 +954,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Canvas" title="Think without boundaries"
-              description="An infinite workspace that grows with your ideas. Sketch system diagrams, plan architecture, map user flows — then zoom out to see the complete picture."
+              description="An infinite workspace that grows with your ideas. Sketch system diagrams, plan architecture, map user flows - then zoom out to see the complete picture."
               visual={<CanvasMockup />} reverse={false} />
           </div>
         </section>
@@ -972,7 +972,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Editing" title="Built for visual thinking"
-              description="Shapes, connectors, text, images, freehand strokes — every element lives in the same canvas. Select, resize, rotate, group, and lock anything."
+              description="Shapes, connectors, text, images, freehand strokes - every element lives in the same canvas. Select, resize, rotate, group, and lock anything."
               visual={<ToolsMockup />} reverse={false} />
           </div>
         </section>
@@ -990,7 +990,7 @@ export function LandingPage({ onSignedIn: _onSignedIn, onGoToApp }: LandingPageP
         <section style={{ padding: mobile ? '48px 20px' : '100px 48px', background: '#fff', borderTop: '1px solid #F0F0F0' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <FeatureSection label="Diagrams" title="Mermaid to diagram conversion"
-              description="Paste any Mermaid flowchart and it instantly becomes fully editable canvas elements — shapes, arrows, and labels you can move, restyle, and extend."
+              description="Paste any Mermaid flowchart and it instantly becomes fully editable canvas elements - shapes, arrows, and labels you can move, restyle, and extend."
               visual={<MermaidMockup />} reverse={false} />
           </div>
         </section>

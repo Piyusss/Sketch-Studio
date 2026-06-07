@@ -144,7 +144,7 @@ export function WorkspacesPage({ onOpen, onHome }: WorkspacesPageProps) {
         >
           <div>
             <h1 style={{ fontSize: 26, fontWeight: 700, color: '#0F172A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
-              Hi, {user?.name?.split(' ')[0] ?? 'there'} 👋
+              Hi, {user?.name?.split(' ')[0] ?? 'there'} 👽
             </h1>
             <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>
               {workspaces.length === 0 ? 'Create your first workspace to get started.' : 'Select a workspace to continue.'}
