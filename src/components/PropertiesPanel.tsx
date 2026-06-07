@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useCanvasStore } from '../store/canvasStore';
 import type { CanvasObject, RectObject, EllipseObject, DiamondObject, TextObject, ArrowObject, ArrowHead, PenObject, StrokeStyle } from '../types';
@@ -251,13 +252,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function PropertiesPanel() {
   const mobile = useIsMobile();
   const selectedIds = useCanvasStore((s) => s.selectedIds);
-  const objects = useCanvasStore((s) => s.objects);
+  // Subscribe only to the selected objects themselves (shallow-compared), not
+  // the whole map — otherwise every object anywhere moving (e.g. drags, frame
+  // children riding along) would re-render this entire panel on every tick.
+  // `s.objects[id]` keeps its reference for untouched objects, so shallow
+  // equality only sees a change when one of *these* objects actually changed.
+  const selected = useCanvasStore(
+    useShallow((s) => selectedIds.map((id) => s.objects[id]).filter((o): o is CanvasObject => !!o)),
+  );
   const updateObject = useCanvasStore((s) => s.updateObject);
   const penRecentColors = useCanvasStore((s) => s.penRecentColors);
-
-  const selected = selectedIds
-    .map((id) => objects[id])
-    .filter((o): o is CanvasObject => !!o);
 
   const update = useCallback(
     (updates: Partial<CanvasObject>) => {

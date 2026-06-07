@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useCanvasStore } from '../store/canvasStore';
 import type { Tool, StrokeStyle } from '../types';
 import { historyManager } from '../history/historyManager';
@@ -272,11 +273,16 @@ export function Toolbar() {
   const groupSelected = useCanvasStore((s) => s.groupSelected);
   const ungroupSelected = useCanvasStore((s) => s.ungroupSelected);
   const toggleLock = useCanvasStore((s) => s.toggleLock);
-  const objects = useCanvasStore((s) => s.objects);
-
-  const firstSelected = selectedIds.length > 0 ? objects[selectedIds[0]] : null;
-  const isLocked = firstSelected?.locked ?? false;
-  const isGroup = firstSelected?.type === 'group';
+  // The toolbar only ever needs the first selection's `locked`/`type` — both
+  // stable during drags (only x/y/etc. change). Selecting just these two
+  // shallow-compared primitives, instead of the whole objects map, keeps the
+  // toolbar from re-rendering on every position tick while something moves.
+  const { isLocked, isGroup } = useCanvasStore(
+    useShallow((s) => {
+      const obj = selectedIds.length > 0 ? s.objects[selectedIds[0]] : null;
+      return { isLocked: obj?.locked ?? false, isGroup: obj?.type === 'group' };
+    }),
+  );
   const canGroup = selectedIds.length >= 2;
 
   // Shapes dropdown — rendered through a portal (see below) since the toolbar

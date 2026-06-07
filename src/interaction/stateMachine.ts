@@ -36,6 +36,12 @@ function eraserCircleOverlapsBox(center: Vec2, radius: number, obj: { x: number;
   return Math.hypot(center.x - nearX, center.y - nearY) <= radius;
 }
 
+// Eases the drag-lift elevation in/out — same exponential-decay shape as the
+// camera's pan/zoom lerp (engine/camera.ts), so all "premium motion" in the
+// app shares one feel. Higher K than the camera's because this is a small,
+// local effect that should settle quickly rather than visibly trail the cursor.
+const DRAG_LIFT_LERP_K = 22;
+
 function segDistWorld(p: Vec2, a: Vec2, b: Vec2): number {
   const dx = b.x - a.x, dy = b.y - a.y;
   const lenSq = dx * dx + dy * dy;
@@ -65,6 +71,24 @@ export class InteractionStateMachine {
   private moveLastWorld: Vec2 = { x: 0, y: 0 };
   // Objects captured inside a frame being moved — they travel with the frame.
   private frameChildStart = new Map<string, { x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number }>();
+  // Non-selected top-level objects eligible as snap targets — captured once when
+  // the drag starts instead of being rebuilt from the full object map every tick.
+  private moveCandidates: CanvasObject[] = [];
+  // RAF-coalesced input: every pointermove stashes the latest screen point here:
+  // the actual snap computation + store commit runs at most once per animation
+  // frame, using the freshest sample, so bursts of input between frames collapse
+  // into a single state update instead of N redundant ones.
+  private pendingMoveSp: Vec2 | null = null;
+  private moveRafId: number | null = null;
+
+  // Soft "lift": eases in while an object is actively being dragged and back out
+  // after it's dropped, using the same exponential-decay lerp as the camera
+  // (engine/camera.ts) so the motion reads as one consistent idiom app-wide.
+  // Purely a visual cue (drives a soft elevation shadow in the renderer) — it
+  // never touches committed positions, so precision is unaffected.
+  liftedIds: Set<string> = new Set();
+  dragLift = 0;
+  private dragLiftTarget = 0;
 
   // Resize
   private resizeHandle: ResizeHandle | null = null;
@@ -112,6 +136,23 @@ export class InteractionStateMachine {
 
   updateCamera(camera: Camera): void {
     this.camera = camera;
+  }
+
+  /**
+   * Eases `dragLift` toward its target (1 while dragging, 0 once dropped) using
+   * the same frame-rate-independent exponential decay as `tickCamera`. Called
+   * once per animation frame from Canvas.tsx; returns true while still
+   * animating so the caller knows to keep redrawing.
+   */
+  tickDragLift(dt: number): boolean {
+    if (this.dragLift === this.dragLiftTarget) return false;
+    const factor = 1 - Math.exp(-DRAG_LIFT_LERP_K * dt);
+    this.dragLift += (this.dragLiftTarget - this.dragLift) * factor;
+    if (Math.abs(this.dragLift - this.dragLiftTarget) < 0.003) {
+      this.dragLift = this.dragLiftTarget;
+      if (this.dragLift === 0) this.liftedIds.clear();
+    }
+    return true;
   }
 
   get activeResizeHandle(): ResizeHandle | null { return this.resizeHandle; }
@@ -233,7 +274,7 @@ export class InteractionStateMachine {
 
     switch (this.mode) {
       case 'panning':       this.updatePan(sp); break;
-      case 'moving':        this.updateMove(sp); break;
+      case 'moving':        this.scheduleMoveUpdate(sp); break;
       case 'resizing':      this.updateResize(sp); break;
       case 'selecting':     this.updateSelecting(sp); break;
       case 'drawing':       this.updateDraw(sp); break;
@@ -350,6 +391,9 @@ export class InteractionStateMachine {
     this.mode = 'moving';
     this.moveLastWorld = screenToWorld(sp, this.camera);
     this.moveStartPositions.clear();
+    const store = useCanvasStore.getState();
+    const selSet = new Set(store.selectedIds);
+    this.moveCandidates = Object.values(store.objects).filter((o) => !selSet.has(o.id) && !o.parentId);
     objects.forEach((obj) => {
       if (obj.type === 'arrow') {
         const a = obj as ArrowObject;
@@ -359,6 +403,10 @@ export class InteractionStateMachine {
       }
     });
     this.captureFrameChildren(objects);
+
+    // Kick off the lift — the renderer eases toward this target every frame.
+    this.liftedIds = new Set(objects.map((o) => o.id));
+    this.dragLiftTarget = 1;
   }
 
   /**
@@ -388,24 +436,58 @@ export class InteractionStateMachine {
     }
   }
 
-  private updateMove(sp: Vec2): void {
+  /**
+   * Entry point from handlePointerMove while dragging. Raw pointer events can
+   * fire far more often than the screen repaints — sampling them is cheap, but
+   * the snap search + store commit below is not. Stash the latest point and do
+   * the real work at most once per animation frame (the freshest sample wins),
+   * so the cursor always feels tightly tracked while the heavy lifting never
+   * piles up between frames.
+   */
+  private scheduleMoveUpdate(sp: Vec2): void {
+    this.pendingMoveSp = sp;
+    if (this.moveRafId !== null) return;
+    this.moveRafId = requestAnimationFrame(() => {
+      this.moveRafId = null;
+      const next = this.pendingMoveSp;
+      this.pendingMoveSp = null;
+      if (next && this.mode === 'moving') this.commitMove(next);
+    });
+  }
+
+  /** Run any coalesced move synchronously — called right before drop so the final position lands exactly under the cursor with no one-frame lag. */
+  private flushPendingMove(): void {
+    if (this.moveRafId !== null) {
+      cancelAnimationFrame(this.moveRafId);
+      this.moveRafId = null;
+    }
+    const next = this.pendingMoveSp;
+    this.pendingMoveSp = null;
+    if (next) this.commitMove(next);
+  }
+
+  private commitMove(sp: Vec2): void {
     const wp = screenToWorld(sp, this.camera);
     let dx = wp.x - this.moveLastWorld.x;
     let dy = wp.y - this.moveLastWorld.y;
+    if (dx === 0 && dy === 0) return;
 
     const store = useCanvasStore.getState();
     const dragging = store.selectedIds
       .map((id) => store.getObject(id))
       .filter((o): o is CanvasObject => !!o);
+    if (dragging.length === 0) return;
 
     const tentative = dragging.map((obj) => ({ ...obj, x: obj.x + dx, y: obj.y + dy }));
-    const candidates = Object.values(store.objects).filter(
-      (o) => !store.selectedIds.includes(o.id) && !o.parentId,
-    );
-    const snap = computeSnap(tentative, candidates, this.camera.zoom, this.gridSnap, this.objectSnap);
+    const snap = computeSnap(tentative, this.moveCandidates, this.camera.zoom, this.gridSnap, this.objectSnap);
     dx += snap.dx; dy += snap.dy;
     this.snapGuides = snap.guides;
     this.moveLastWorld = { x: wp.x + snap.dx, y: wp.y + snap.dy };
+
+    // Batch every patch from this tick (selection + carried frame children)
+    // into a single store commit — one notification instead of N, which is
+    // what made multi-object drags feel like they were stuttering.
+    const patches: { id: string; updates: Partial<CanvasObject> }[] = [];
 
     dragging.forEach((obj) => {
       const newX = obj.x + dx;
@@ -413,10 +495,10 @@ export class InteractionStateMachine {
       if (obj.type === 'arrow') {
         const a = obj as ArrowObject;
         const updates = { x: newX, y: newY, x1: a.x1 + dx, y1: a.y1 + dy, x2: a.x2 + dx, y2: a.y2 + dy };
-        store.updateObject(obj.id, updates as Partial<CanvasObject>);
+        patches.push({ id: obj.id, updates: updates as Partial<CanvasObject> });
         spatialIndex.insert({ ...obj, ...updates });
       } else {
-        store.updateObject(obj.id, { x: newX, y: newY });
+        patches.push({ id: obj.id, updates: { x: newX, y: newY } });
         spatialIndex.insert({ ...obj, x: newX, y: newY });
       }
     });
@@ -429,17 +511,25 @@ export class InteractionStateMachine {
         if (obj.type === 'arrow') {
           const a = obj as ArrowObject;
           const updates = { x: obj.x + dx, y: obj.y + dy, x1: a.x1 + dx, y1: a.y1 + dy, x2: a.x2 + dx, y2: a.y2 + dy };
-          store.updateObject(id, updates as Partial<CanvasObject>);
+          patches.push({ id, updates: updates as Partial<CanvasObject> });
           spatialIndex.insert({ ...obj, ...updates });
         } else {
-          store.updateObject(id, { x: obj.x + dx, y: obj.y + dy });
+          patches.push({ id, updates: { x: obj.x + dx, y: obj.y + dy } });
           spatialIndex.insert({ ...obj, x: obj.x + dx, y: obj.y + dy });
         }
       });
     }
+
+    store.updateObjects(patches);
   }
 
   private endMove(): void {
+    // Commit any sample still waiting on a coalesced RAF so the drop lands
+    // exactly under the cursor — otherwise the object would visibly settle
+    // back to a one-frame-stale position the instant the pointer is released.
+    this.flushPendingMove();
+    this.dragLiftTarget = 0;
+
     const store = useCanvasStore.getState();
     // Combine the selected objects with any captured frame children
     const movedIds = [...store.selectedIds, ...this.frameChildStart.keys()];
@@ -462,18 +552,18 @@ export class InteractionStateMachine {
     this.frameChildStart.clear();
 
     if (moves.length > 0) {
+      const applyMoves = (key: 'to' | 'from') => {
+        const s = useCanvasStore.getState();
+        s.updateObjects(moves.map((m) => ({ id: m.id, updates: m[key] as Partial<CanvasObject> })));
+        moves.forEach(({ id }) => {
+          const o = s.getObject(id);
+          if (o) spatialIndex.insert(o);
+        });
+      };
       historyManager.push({
         description: 'Move objects',
-        execute: () => moves.forEach(({ id, to }) => {
-          useCanvasStore.getState().updateObject(id, to as Partial<CanvasObject>);
-          const o = useCanvasStore.getState().getObject(id);
-          if (o) spatialIndex.insert(o);
-        }),
-        undo: () => moves.forEach(({ id, from }) => {
-          useCanvasStore.getState().updateObject(id, from as Partial<CanvasObject>);
-          const o = useCanvasStore.getState().getObject(id);
-          if (o) spatialIndex.insert(o);
-        }),
+        execute: () => applyMoves('to'),
+        undo: () => applyMoves('from'),
       });
     }
     this.snapGuides = [];

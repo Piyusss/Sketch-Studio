@@ -30,6 +30,8 @@ export interface CanvasState {
 
   addObject: (obj: CanvasObject) => void;
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
+  /** Apply many patches in a single store commit — one notification instead of N. */
+  updateObjects: (patches: { id: string; updates: Partial<CanvasObject> }[]) => void;
   removeObject: (id: string) => void;
   removeObjects: (ids: string[]) => void;
   getObject: (id: string) => CanvasObject | undefined;
@@ -186,6 +188,21 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           [id]: { ...existing, ...updates, updatedAt: Date.now() } as CanvasObject,
         },
       };
+    }),
+
+  updateObjects: (patches) =>
+    set((state) => {
+      if (patches.length === 0) return state;
+      const now = Date.now();
+      const objects = { ...state.objects };
+      let changed = false;
+      for (const { id, updates } of patches) {
+        const existing = objects[id];
+        if (!existing) continue;
+        objects[id] = { ...existing, ...updates, updatedAt: now } as CanvasObject;
+        changed = true;
+      }
+      return changed ? { objects } : state;
     }),
 
   removeObject: (id) =>

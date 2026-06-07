@@ -177,7 +177,13 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
     const unsub = useCanvasStore.subscribe((state) => {
       if (state.objects !== prevObjects) {
         prevObjects = state.objects;
-        spatialIndex.rebuild(state.objects);
+        // No spatialIndex.rebuild here: every mutation path (move, resize,
+        // rotate, add/remove, group/ungroup, paste, undo/redo, property edits,
+        // bulk load via loadObjects, ...) already keeps the index in sync with
+        // surgical insert()/remove()/rebuild() calls at its own call site. A
+        // reference-equality check on `objects` is true on *every* edit — so a
+        // rebuild here would mean a full O(n log n) tree rebuild on every
+        // single drag tick, which was the single biggest source of stutter.
         needsRenderRef.current = true;
       }
       if (state.canvasBg !== prevBg) {
@@ -276,7 +282,8 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
 
       const cam = cameraRef.current;
       const moved = tickCamera(cam, dt);
-      if (moved) needsRenderRef.current = true;
+      const lifting = smRef.current.tickDragLift(dt);
+      if (moved || lifting) needsRenderRef.current = true;
 
       if (needsRenderRef.current) {
         needsRenderRef.current = false;
@@ -299,7 +306,11 @@ export function Canvas({ readOnly = false }: { readOnly?: boolean } = {}) {
             .sort((a, b) => a.zIndex - b.zIndex);
 
           const oCtx = objRef.current?.getContext('2d');
-          if (oCtx) drawObjects(oCtx, visible, cam, w, h, store.objects, store.editingTextId);
+          if (oCtx) {
+            const sm = smRef.current;
+            const liftedIds = sm.dragLift > 0.001 ? sm.liftedIds : null;
+            drawObjects(oCtx, visible, cam, w, h, store.objects, store.editingTextId, liftedIds, sm.dragLift);
+          }
 
           // Keep the inline text editor aligned with the world when panning/zooming
           if (textEditorRef.current && store.editingTextId) {

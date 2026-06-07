@@ -118,12 +118,15 @@ export function drawObjects(
   height: number,
   allObjects: Record<string, CanvasObject>,
   editingTextId?: string | null,
+  liftedIds?: ReadonlySet<string> | null,
+  dragLift?: number,
 ): void {
   ctx.clearRect(0, 0, width, height);
+  const lift = dragLift ?? 0;
   for (const obj of objects) {
     if (!obj.visible) continue;
     if (editingTextId && obj.id === editingTextId) continue; // textarea overlay shows instead
-    drawObject(ctx, obj, camera, allObjects);
+    drawObject(ctx, obj, camera, allObjects, liftedIds?.has(obj.id) ? lift : 0);
   }
 }
 
@@ -154,16 +157,31 @@ export function renderForExport(
   }
 }
 
+/**
+ * Soft elevation shadow applied to objects actively being dragged. `lift`
+ * ranges 0..1 (eased in the state machine — see tickDragLift) so the shadow
+ * grows in on pickup and melts away on drop rather than snapping on/off.
+ * Shadow properties persist through translate/rotate and apply uniformly to
+ * fills, strokes and images, so one switch covers every object type.
+ */
+function applyDragLift(ctx: CanvasRenderingContext2D, lift: number): void {
+  ctx.shadowColor = `rgba(15, 23, 42, ${(0.28 * lift).toFixed(3)})`;
+  ctx.shadowBlur = 22 * lift;
+  ctx.shadowOffsetY = 7 * lift;
+}
+
 function drawObject(
   ctx: CanvasRenderingContext2D,
   obj: CanvasObject,
   camera: Camera,
   allObjects: Record<string, CanvasObject>,
+  lift = 0,
 ): void {
   // Arrows use absolute world coordinates — no bbox transform needed
   if (obj.type === 'arrow') {
     ctx.save();
     ctx.globalAlpha = obj.opacity;
+    if (lift > 0.001) applyDragLift(ctx, lift);
     drawArrow(ctx, obj as ArrowObject, camera);
     ctx.restore();
     return;
@@ -176,6 +194,7 @@ function drawObject(
 
   ctx.save();
   ctx.globalAlpha = obj.opacity;
+  if (lift > 0.001) applyDragLift(ctx, lift);
 
   if (obj.rotation !== 0) {
     const cx = sx + sw / 2;
