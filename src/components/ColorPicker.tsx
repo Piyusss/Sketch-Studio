@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React from 'react';
+import { ColorSwatchButton } from './ColorSwatchButton';
 
 export const PRESET_COLORS = [
   '#000000', '#374151', '#6B7280', '#9CA3AF',
@@ -14,30 +15,13 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ value, onChange, recentColors = [] }: ColorPickerProps) {
-  const nativeRef = useRef<HTMLInputElement>(null);
   const safeValue = /^#[0-9A-Fa-f]{6}$/.test(value) ? value : '#374151';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {/* Swatch + hex input */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        <div
-          onClick={() => nativeRef.current?.click()}
-          style={{
-            width: 28, height: 28, borderRadius: 6, flexShrink: 0,
-            background: safeValue,
-            border: safeValue === '#FFFFFF' ? '1px solid #E4E4E7' : '1px solid rgba(0,0,0,0.12)',
-            cursor: 'pointer', position: 'relative',
-          }}
-        >
-          <input
-            ref={nativeRef}
-            type="color"
-            value={safeValue}
-            onChange={(e) => onChange(e.target.value)}
-            style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%', padding: 0, border: 'none' }}
-          />
-        </div>
+        <ColorSwatchButton value={safeValue} onChange={onChange} />
         <input
           type="text"
           value={value}

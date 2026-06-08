@@ -7,6 +7,7 @@ import { spatialIndex } from '../engine/spatialIndex';
 import { computeArrowBBox } from '../utils/math';
 import { measureTextBox } from '../utils/textMetrics';
 import { ColorPicker } from './ColorPicker';
+import { ColorSwatchButton } from './ColorSwatchButton';
 import { FONT_FAMILIES, FONT_CATEGORIES } from '../lib/fonts';
 
 const label: React.CSSProperties = {
@@ -62,11 +63,9 @@ function ColorInput({
     <div>
       <div style={label}>{labelText}</div>
       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-        <input
-          type="color"
+        <ColorSwatchButton
           value={value.startsWith('#') ? value : '#374151'}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer' }}
+          onChange={onChange}
         />
         <input
           type="text"
@@ -116,11 +115,9 @@ function FillInput({
 
       {enabled ? (
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          <input
-            type="color"
-            value={value.startsWith('#') ? value : 'var(--active-fg)'}
-            onChange={(e) => onChange(e.target.value)}
-            style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer' }}
+          <ColorSwatchButton
+            value={value.startsWith('#') ? value : '#374151'}
+            onChange={onChange}
           />
           <input
             type="text"
@@ -193,11 +190,9 @@ function StrokeInput({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {/* Color row */}
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <input
-              type="color"
+            <ColorSwatchButton
               value={color.startsWith('#') ? color : '#374151'}
-              onChange={(e) => onColorChange(e.target.value)}
-              style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
+              onChange={onColorChange}
             />
             <input
               type="text"
