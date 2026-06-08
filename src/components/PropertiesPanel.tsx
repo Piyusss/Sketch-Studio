@@ -87,7 +87,7 @@ function FillInput({
   onChange: (v: string) => void;
 }) {
   const enabled = value !== 'none';
-  const colorVal = enabled ? value : 'var(--active-fg)';
+  const colorVal = enabled ? value : '#6366F1';
 
   function toggle() {
     onChange(enabled ? 'none' : colorVal);
@@ -231,6 +231,10 @@ function StrokeInput({
   );
 }
 
+function Divider() {
+  return <div style={{ height: 1, background: 'var(--divider)', margin: '2px 0' }} />;
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -321,19 +325,35 @@ export function PropertiesPanel() {
             value={(first as RectObject | EllipseObject | DiamondObject).fill}
             onChange={(v) => update({ fill: v } as Partial<CanvasObject>)}
           />
+          <Divider />
           <StrokeInput
             color={(first as RectObject | EllipseObject | DiamondObject).stroke}
             width={(first as RectObject | EllipseObject | DiamondObject).strokeWidth}
             onColorChange={(v) => update({ stroke: v } as Partial<CanvasObject>)}
             onWidthChange={(v) => update({ strokeWidth: Math.max(0, v) } as Partial<CanvasObject>)}
           />
-          {first.type === 'rect' && (
-            <NumInput
-              label="Corner radius"
-              value={(first as RectObject).cornerRadius}
-              onChange={(v) => update({ cornerRadius: Math.max(0, v) } as Partial<CanvasObject>)}
-            />
-          )}
+          {first.type === 'rect' && (() => {
+            const radiusMax = Math.max(1, Math.floor(Math.min(avg('width'), avg('height')) / 2));
+            const radius = Math.min((first as RectObject).cornerRadius, radiusMax);
+            return (
+              <>
+                <Divider />
+                <div>
+                  <div style={label}>Corner radius</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="range"
+                      min={0} max={radiusMax} step={1}
+                      value={radius}
+                      onChange={(e) => update({ cornerRadius: parseFloat(e.target.value) } as Partial<CanvasObject>)}
+                      style={{ flex: 1 }}
+                    />
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 24, textAlign: 'right' }}>{radius}</span>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </Section>
       )}
 
@@ -599,10 +619,12 @@ export function PropertiesPanel() {
                 placeholder="Frame name"
               />
             </div>
+            <Divider />
             <FillInput
               value={frame.fill}
               onChange={(v) => update({ fill: v } as Partial<CanvasObject>)}
             />
+            <Divider />
             <StrokeInput
               color={frame.stroke}
               width={frame.strokeWidth}
