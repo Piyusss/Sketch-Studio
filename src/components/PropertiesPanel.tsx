@@ -66,7 +66,7 @@ function ColorInput({
           type="color"
           value={value.startsWith('#') ? value : '#374151'}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer' }}
+          style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer' }}
         />
         <input
           type="text"
@@ -120,7 +120,7 @@ function FillInput({
             type="color"
             value={value.startsWith('#') ? value : 'var(--active-fg)'}
             onChange={(e) => onChange(e.target.value)}
-            style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer' }}
+            style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer' }}
           />
           <input
             type="text"
@@ -197,7 +197,7 @@ function StrokeInput({
               type="color"
               value={color.startsWith('#') ? color : '#374151'}
               onChange={(e) => onColorChange(e.target.value)}
-              style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--panel-border)', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
+              style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
             />
             <input
               type="text"
