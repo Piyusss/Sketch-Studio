@@ -68,6 +68,17 @@ export class InteractionStateMachine {
 
   // Move
   private moveStartPositions = new Map<string, { x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number }>();
+  // World point under the cursor when the drag began — fixed for the whole
+  // gesture. Every frame's position is `start + (current - dragStartWorld)`,
+  // a pure function of the *raw* cursor delta. Snap is then layered on top as
+  // a small additive correction recomputed fresh each frame from the tentative
+  // (unsnapped) position. Earlier this folded the snap offset back into the
+  // tracked "last" point, so each snapped frame permanently shifted the
+  // cursor↔object anchor — the object would drift relative to the cursor and
+  // visibly micro-jitter as snap engaged/disengaged. Anchoring to a fixed
+  // start point makes the raw motion perfectly smooth and the snap a pure,
+  // non-compounding visual offset — the same approach Figma/tldraw use.
+  private dragStartWorld: Vec2 = { x: 0, y: 0 };
   private moveLastWorld: Vec2 = { x: 0, y: 0 };
   // Objects captured inside a frame being moved — they travel with the frame.
   private frameChildStart = new Map<string, { x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number }>();
@@ -389,7 +400,8 @@ export class InteractionStateMachine {
 
   private startMove(sp: Vec2, objects: CanvasObject[]): void {
     this.mode = 'moving';
-    this.moveLastWorld = screenToWorld(sp, this.camera);
+    this.dragStartWorld = screenToWorld(sp, this.camera);
+    this.moveLastWorld = this.dragStartWorld;
     this.moveStartPositions.clear();
     const store = useCanvasStore.getState();
     const selSet = new Set(store.selectedIds);
@@ -468,9 +480,14 @@ export class InteractionStateMachine {
 
   private commitMove(sp: Vec2): void {
     const wp = screenToWorld(sp, this.camera);
-    let dx = wp.x - this.moveLastWorld.x;
-    let dy = wp.y - this.moveLastWorld.y;
-    if (dx === 0 && dy === 0) return;
+    if (wp.x === this.moveLastWorld.x && wp.y === this.moveLastWorld.y) return;
+    this.moveLastWorld = wp;
+
+    // Raw cursor delta since the *start* of the drag — never mutated by snap,
+    // so the object's relationship to the cursor stays perfectly fixed and
+    // every frame's position is a pure function of (start, rawDelta, snap).
+    const rawDx = wp.x - this.dragStartWorld.x;
+    const rawDy = wp.y - this.dragStartWorld.y;
 
     const store = useCanvasStore.getState();
     const dragging = store.selectedIds
@@ -478,11 +495,16 @@ export class InteractionStateMachine {
       .filter((o): o is CanvasObject => !!o);
     if (dragging.length === 0) return;
 
-    const tentative = dragging.map((obj) => ({ ...obj, x: obj.x + dx, y: obj.y + dy }));
+    const tentative = dragging.map((obj) => {
+      const start = this.moveStartPositions.get(obj.id);
+      const x = (start?.x ?? obj.x) + rawDx;
+      const y = (start?.y ?? obj.y) + rawDy;
+      return { ...obj, x, y };
+    });
     const snap = computeSnap(tentative, this.moveCandidates, this.camera.zoom, this.gridSnap, this.objectSnap);
-    dx += snap.dx; dy += snap.dy;
     this.snapGuides = snap.guides;
-    this.moveLastWorld = { x: wp.x + snap.dx, y: wp.y + snap.dy };
+    const dx = rawDx + snap.dx;
+    const dy = rawDy + snap.dy;
 
     // Batch every patch from this tick (selection + carried frame children)
     // into a single store commit — one notification instead of N, which is
@@ -490,11 +512,14 @@ export class InteractionStateMachine {
     const patches: { id: string; updates: Partial<CanvasObject> }[] = [];
 
     dragging.forEach((obj) => {
-      const newX = obj.x + dx;
-      const newY = obj.y + dy;
+      const start = this.moveStartPositions.get(obj.id);
+      const newX = (start?.x ?? obj.x) + dx;
+      const newY = (start?.y ?? obj.y) + dy;
       if (obj.type === 'arrow') {
         const a = obj as ArrowObject;
-        const updates = { x: newX, y: newY, x1: a.x1 + dx, y1: a.y1 + dy, x2: a.x2 + dx, y2: a.y2 + dy };
+        const sx1 = start?.x1 ?? a.x1, sy1 = start?.y1 ?? a.y1;
+        const sx2 = start?.x2 ?? a.x2, sy2 = start?.y2 ?? a.y2;
+        const updates = { x: newX, y: newY, x1: sx1 + dx, y1: sy1 + dy, x2: sx2 + dx, y2: sy2 + dy };
         patches.push({ id: obj.id, updates: updates as Partial<CanvasObject> });
         spatialIndex.insert({ ...obj, ...updates });
       } else {
@@ -505,17 +530,20 @@ export class InteractionStateMachine {
 
     // Carry captured frame contents along by the same delta
     if (this.frameChildStart.size > 0) {
-      this.frameChildStart.forEach((_start, id) => {
+      this.frameChildStart.forEach((start, id) => {
         const obj = store.getObject(id);
         if (!obj) return;
+        const newX = start.x + dx;
+        const newY = start.y + dy;
         if (obj.type === 'arrow') {
-          const a = obj as ArrowObject;
-          const updates = { x: obj.x + dx, y: obj.y + dy, x1: a.x1 + dx, y1: a.y1 + dy, x2: a.x2 + dx, y2: a.y2 + dy };
+          const sx1 = start.x1 ?? 0, sy1 = start.y1 ?? 0;
+          const sx2 = start.x2 ?? 0, sy2 = start.y2 ?? 0;
+          const updates = { x: newX, y: newY, x1: sx1 + dx, y1: sy1 + dy, x2: sx2 + dx, y2: sy2 + dy };
           patches.push({ id, updates: updates as Partial<CanvasObject> });
           spatialIndex.insert({ ...obj, ...updates });
         } else {
-          patches.push({ id, updates: { x: obj.x + dx, y: obj.y + dy } });
-          spatialIndex.insert({ ...obj, x: obj.x + dx, y: obj.y + dy });
+          patches.push({ id, updates: { x: newX, y: newY } });
+          spatialIndex.insert({ ...obj, x: newX, y: newY });
         }
       });
     }
